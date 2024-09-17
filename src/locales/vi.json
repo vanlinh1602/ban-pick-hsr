@@ -1,7 +1,8 @@
 {
-  "appName": "Kuma Simulator",
+  "appName": "Ao Làng Honkai Star Rail",
   "pages": {
     "home": "Trang chủ",
+    "users": "Người dùng",
     "settings": "Cài đặt"
   },
   "actions": {

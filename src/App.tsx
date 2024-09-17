@@ -1,5 +1,6 @@
 import './App.css';
 
+import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { lazy, Suspense } from 'react';
 import {
   createBrowserRouter,
@@ -9,28 +10,20 @@ import {
   RouterProvider,
 } from 'react-router-dom';
 
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sider } from '@/features/layout/components';
+import { MenuBar } from './features/layout/components';
 
 const Home = lazy(() => import('./pages/Home'));
 const Settings = lazy(() => import('./pages/Settings'));
 
 const AppLayout = () => (
   <Suspense>
-    <div
-      className="grid grid-cols-8 font-mono"
-      style={{
-        height: '100vh',
-        width: '100vw',
-        padding: '0.5rem',
-      }}
-    >
-      <div className="col-span-1">
-        <Sider />
-      </div>
-      <ScrollArea className="h-full col-span-7">
-        <Outlet />
-      </ScrollArea>
+    <div className="flex flex-col h-screen w-screen bg-gray-100">
+      <MenuBar />
+      <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+        <ScrollArea>
+          <Outlet />
+        </ScrollArea>
+      </main>
     </div>
   </Suspense>
 );
@@ -42,6 +35,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="*" element={<div>Chưa làm hehe</div>} />
       </Route>,
     ),
   );

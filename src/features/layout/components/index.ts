@@ -1,1 +1,1 @@
-export { default as Sider } from './Sider';
+export { default as MenuBar } from './MenuBar';
