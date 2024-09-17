@@ -1,0 +1,12 @@
+{
+  "appName": "Kuma Simulator",
+  "pages": {
+    "home": "Trang chủ",
+    "settings": "Cài đặt"
+  },
+  "actions": {
+    "update": "Cập nhật"
+  },
+  "gameInAccount": "Trò chơi trong tài khoản",
+  "battleChronicle": "Chiến tích"
+}

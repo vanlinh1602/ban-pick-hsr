@@ -1,0 +1,16 @@
+{
+  "common": {
+    "home": "Home",
+    "or": "Or"
+  },
+  "notFoundPage": {
+    "subTitle": "Page not found"
+  },
+  "errorBoundaryPage": {
+    "oops": "Oops! Something went wrong"
+  },
+  "loginPage": {
+    "signIn": "Sign in",
+    "signinWithGoogle": "Sign in with Google"
+  }
+}
