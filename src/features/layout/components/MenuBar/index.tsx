@@ -3,9 +3,9 @@ import {
   ChevronDown,
   LayoutDashboard,
   LogOut,
+  Medal,
   Menu,
-  Settings,
-  Users,
+  MonitorCog,
   X,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -40,18 +40,18 @@ const MenuBar = () => {
 
   return (
     <header className="bg-white shadow-sm z-10">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-full max-h-20 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4 md:justify-start md:space-x-10">
           {/* Logo */}
-          <div
-            onClick={() => navigate('/')}
-            className="flex justify-start lg:w-0 lg:flex-1 cursor-pointer items-center"
-          >
+          <div className="flex justify-start lg:w-0 lg:flex-1 items-center">
             <Avatar>
               <AvatarImage src={logo} alt="avatar" />
               <AvatarFallback>HSR</AvatarFallback>
             </Avatar>
-            <div className="text-xl font-bold text-gray-900 ml-2">
+            <div
+              className="text-xl font-bold text-gray-900 ml-2 cursor-pointer"
+              onClick={() => navigate('/')}
+            >
               {t(translations.appName)}
             </div>
           </div>
@@ -75,7 +75,7 @@ const MenuBar = () => {
           <nav className="hidden md:flex space-x-10">
             <div
               onClick={() => navigate('/home')}
-              className="text-base font-medium text-gray-500 hover:text-gray-900"
+              className="text-base font-medium text-gray-500 hover:text-gray-900 cursor-pointer"
             >
               <div
                 className={`${
@@ -87,29 +87,29 @@ const MenuBar = () => {
               </div>
             </div>
             <div
-              onClick={() => navigate('/users')}
-              className="text-base font-medium text-gray-500 hover:text-gray-900"
+              onClick={() => navigate('/match')}
+              className="text-base font-medium text-gray-500 hover:text-gray-900 cursor-pointer"
             >
               <div
                 className={`${
-                  activeKey === 'users' ? 'text-gray-900' : 'text-gray-500'
+                  activeKey === 'match' ? 'text-gray-900' : 'text-gray-500'
                 } hover:text-gray-900`}
               >
-                <Users className="inline-block mr-2 h-5 w-5" />
-                {t(translations.pages.users)}
+                <Medal className="inline-block mr-2 h-5 w-5" />
+                {t(translations.pages.match)}
               </div>
             </div>
             <div
-              onClick={() => navigate('/settings')}
-              className="text-base font-medium text-gray-500 hover:text-gray-900"
+              onClick={() => navigate('/configs')}
+              className="text-base font-medium text-gray-500 hover:text-gray-900 cursor-pointer"
             >
               <div
                 className={`${
-                  activeKey === 'settings' ? 'text-gray-900' : 'text-gray-500'
+                  activeKey === 'config' ? 'text-gray-900' : 'text-gray-500'
                 } hover:text-gray-900`}
               >
-                <Settings className="inline-block mr-2 h-5 w-5" />
-                {t(translations.pages.settings)}
+                <MonitorCog className="inline-block mr-2 h-5 w-5" />
+                {t(translations.pages.config)}
               </div>
             </div>
           </nav>

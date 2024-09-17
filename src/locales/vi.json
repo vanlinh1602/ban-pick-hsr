@@ -3,8 +3,11 @@
   "pages": {
     "home": "Trang chủ",
     "users": "Người dùng",
-    "settings": "Cài đặt"
+    "settings": "Cài đặt",
+    "config": "Cấu hình",
+    "match": "Trận đấu"
   },
+
   "actions": {
     "update": "Cập nhật"
   },
