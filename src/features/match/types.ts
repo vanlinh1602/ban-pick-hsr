@@ -32,3 +32,31 @@ type ValueType = {
   icon: string;
   enum_string: string;
 };
+
+export type MatchSetUpInfo = {
+  banPickStatus: {
+    player: string;
+    type: 'ban' | 'pick';
+    character?: string;
+  }[];
+  firstPick: number;
+  goFirst: number;
+};
+
+export type Match = {
+  id: string;
+  players: [string, string];
+  status: 'ban-pick' | 'playing' | 'finished';
+  date?: number;
+  winner?: string;
+  games?: {
+    player: string;
+    characters: string[];
+  }[];
+  matchSetup?: MatchSetUpInfo;
+};
+
+export type MatchState = {
+  handling: boolean;
+  data?: CustomObject<Match>;
+};

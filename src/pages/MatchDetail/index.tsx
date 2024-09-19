@@ -1,14 +1,36 @@
-import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
-import BanPick from '../BanPick';
+import Waiting from '@/components/Waiting';
+import { BanPick, MatchLive } from '@/features/match/components';
+import { useMatchSlice } from '@/features/match/store';
+import {
+  selectMatchData,
+  selectMatchHandling,
+} from '@/features/match/store/selectors';
 
 const MatchDetail = () => {
-  const location = useLocation();
-  const { id, ...params } = location.state;
-  if (id) {
-    return <div>Match Detail</div>;
-  }
-  return <BanPick {...params} />;
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  const { actions } = useMatchSlice();
+  const handling = useSelector(selectMatchHandling);
+  const matchData = useSelector((state: any) => selectMatchData(state, id!));
+
+  useEffect(() => {
+    if (id) {
+      dispatch(actions.getMatch(id));
+    }
+  }, []);
+
+  console.log(matchData);
+
+  return (
+    <div>
+      {handling ? <Waiting /> : null}
+      {matchData?.status === 'ban-pick' ? <BanPick id={id!} /> : <MatchLive />}
+    </div>
+  );
 };
 
 export default MatchDetail;

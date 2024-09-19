@@ -1,6 +1,7 @@
 import { Grid2X2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { FaCheck, FaUser } from 'react-icons/fa';
+import { useSelector } from 'react-redux';
 
 import { Input } from '@/components/ui/input';
 import {
@@ -14,7 +15,8 @@ import characters from '@/data/character.json';
 import combatTypes from '@/data/combatType.json';
 import paths from '@/data/path.json';
 
-import { Character } from '../../type';
+import { selectMatchData } from '../../store/selectors';
+import { Character } from '../../types';
 
 type UserInfo = {
   name: string;
@@ -28,9 +30,17 @@ type Filter = {
   name?: string;
 };
 
-const BanPick = () => {
-  const [phase, setPhase] = useState('ban'); // 'ban' or 'pick'\
-  const [activeUser, setActiveUser] = useState('left');
+type Props = {
+  id: string;
+};
+
+const BanPick = ({ id }: Props) => {
+  const matchData = useSelector((state: any) => selectMatchData(state, id));
+  const { matchSetup } = matchData || {};
+  const [activeUser, setActiveUser] = useState<string>(
+    matchSetup?.firstPick === 1 ? 'left' : 'right',
+  );
+  const [turn, setTurn] = useState<number>(0);
   const [filter, setFilter] = useState<Filter>();
   const [leftUser, setLeftUser] = useState<UserInfo>({
     name: 'Player 1',
@@ -44,7 +54,7 @@ const BanPick = () => {
   });
   const [availableCharacters, setAvailableCharacters] =
     useState<Character[]>(characters);
-  const [selectedCharacter, setSelectedCharacter] = useState<Character>();
+  const [selectCharacter, setSelectCharacter] = useState<Character>();
 
   const selectedCharacters = useMemo(() => {
     return leftUser.bans.concat(
@@ -54,6 +64,7 @@ const BanPick = () => {
     );
   }, [leftUser, rightUser]);
 
+  // Filter characters based on selected filters
   useEffect(() => {
     const filteredCharacters = characters.filter((char) => {
       if (selectedCharacters.find((selected) => selected === char))
@@ -84,63 +95,46 @@ const BanPick = () => {
     setAvailableCharacters(filteredCharacters);
   }, [filter]);
 
-  const handlePhaseChange = () => {
-    if (
-      phase === 'ban' &&
-      leftUser.bans.length === 2 &&
-      rightUser.bans.length === 2
-    ) {
-      setPhase('pick');
-    } else if (
-      phase === 'pick' &&
-      leftUser.picks.length === 2 &&
-      rightUser.picks.length === 2
-    ) {
-      // End game or show results
-      alert('Game Over!');
-    } else {
-      setActiveUser(activeUser === 'left' ? 'right' : 'left');
-    }
-  };
-
-  const handleCharacterSelect = (character: any) => {
-    setSelectedCharacter(character);
-  };
-
   const handleConfirm = () => {
-    if (!selectedCharacter) return;
+    if (!selectCharacter) return;
 
     const updatedAvailableCharacters = availableCharacters.filter(
-      (char) => char.entry_page_id !== selectedCharacter.entry_page_id,
+      (char) => char.entry_page_id !== selectCharacter.entry_page_id,
     );
+    const activeTurn = matchSetup?.banPickStatus[turn];
 
-    if (phase === 'ban') {
+    if (activeTurn?.type === 'ban') {
       if (activeUser === 'left') {
         setLeftUser({
           ...leftUser,
-          bans: [...leftUser.bans, selectedCharacter],
+          bans: [...leftUser.bans, selectCharacter],
         });
       } else {
         setRightUser({
           ...rightUser,
-          bans: [...rightUser.bans, selectedCharacter],
+          bans: [...rightUser.bans, selectCharacter],
         });
       }
     } else if (activeUser === 'left') {
       setLeftUser({
         ...leftUser,
-        picks: [...leftUser.picks, selectedCharacter],
+        picks: [...leftUser.picks, selectCharacter],
       });
     } else {
       setRightUser({
         ...rightUser,
-        picks: [...rightUser.picks, selectedCharacter],
+        picks: [...rightUser.picks, selectCharacter],
       });
     }
 
     setAvailableCharacters(updatedAvailableCharacters);
-    setSelectedCharacter(undefined);
-    handlePhaseChange();
+    setSelectCharacter(undefined);
+    setActiveUser((prev) => {
+      const nextTurn = matchSetup?.banPickStatus[turn + 1];
+      if (!nextTurn) return prev;
+      return nextTurn.player === '1' ? 'left' : 'right';
+    });
+    setTurn((pre) => pre + 1);
   };
 
   const renderCharacterGrid = () => {
@@ -148,11 +142,12 @@ const BanPick = () => {
       <button
         key={character.entry_page_id}
         className={`p-2 rounded-lg transition-all duration-300 ${
-          selectedCharacter?.entry_page_id === character.entry_page_id
+          selectCharacter?.entry_page_id === character.entry_page_id
             ? 'ring-4 ring-blue-500'
             : 'hover:ring-2 hover:ring-gray-300'
         } flex flex-col items-center w-full h-full`}
-        onClick={() => handleCharacterSelect(character)}
+        disabled={turn > (matchSetup?.banPickStatus?.length || 0)}
+        onClick={() => setSelectCharacter(character)}
       >
         <img
           src={character.icon_url}
@@ -226,9 +221,14 @@ const BanPick = () => {
       >
         <div className="p-8">
           <h2 className="text-2xl font-bold text-center mb-8">
-            {activeUser === 'left' ? leftUser.name : rightUser.name}
-            &rsquo;s Turn ({phase.charAt(0).toUpperCase() + phase.slice(1)}{' '}
-            Phase)
+            {matchSetup?.banPickStatus?.[turn] ? (
+              <>
+                {activeUser === 'left' ? leftUser.name : rightUser.name} (
+                {matchSetup?.banPickStatus[turn]?.type.toUpperCase()} Phase)
+              </>
+            ) : (
+              'Ban Pick phase is over'
+            )}
           </h2>
           <div className="flex justify-between items-start">
             {renderUserSection(leftUser, 'left')}
@@ -322,9 +322,9 @@ const BanPick = () => {
                 <button
                   onClick={handleConfirm}
                   className={`px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-300 ${
-                    !selectedCharacter ? 'opacity-50 cursor-not-allowed' : ''
+                    !selectCharacter ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
-                  disabled={!selectedCharacter}
+                  disabled={!selectCharacter}
                 >
                   <FaCheck className="inline-block mr-2" /> Confirm
                 </button>

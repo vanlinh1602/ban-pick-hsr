@@ -8,6 +8,7 @@ import {
 } from 'react-beautiful-dnd';
 import { useForm } from 'react-hook-form';
 import { FaBan, FaCheck } from 'react-icons/fa';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
@@ -27,14 +28,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useMatchSlice } from '@/features/match/store';
+import { MatchSetUpInfo } from '@/features/match/types';
 import { determineTurn } from '@/lib/utils';
 
 const Match = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { actions } = useMatchSlice();
   const [numBans, setNumBans] = useState(2);
   const [numPicks, setNumPicks] = useState(2);
-
   const [order, setOrder] = useState<{ player: number; type: string }[]>([]);
+
+  useEffect(() => {
+    const newOrder = determineTurn(numBans, numPicks);
+    setOrder(newOrder);
+  }, [numBans, numPicks]);
 
   const formSchema = z.object({
     numBans: z.string(),
@@ -48,26 +57,29 @@ const Match = () => {
     defaultValues: {
       numBans: '2',
       numPicks: '2',
-      firstPick: 'player1',
-      goFirst: 'player1',
+      firstPick: '1',
+      goFirst: '1',
     },
   });
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    const matchInfo = {
-      firstPick: values.firstPick,
-      goFirst: values.goFirst,
-      turn: order,
+    const matchInfo: MatchSetUpInfo = {
+      firstPick: Number(values.firstPick),
+      goFirst: Number(values.goFirst),
+      banPickStatus: order.map((item) => ({
+        player: 'Player ' + item.player,
+        type: item.type as 'ban' | 'pick',
+      })),
     };
-    navigate('/match/start', { state: { matchInfo } });
+    dispatch(
+      actions.createMatch({
+        mathInfo: matchInfo,
+        onSuccess: (id: string) => {
+          navigate(`/match/${id}`);
+        },
+      }),
+    );
   };
-
-  useEffect(() => {
-    const newOrder = determineTurn(numBans, numPicks);
-    console.log(newOrder);
-
-    setOrder(newOrder);
-  }, [numBans, numPicks]);
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -88,52 +100,6 @@ const Match = () => {
           height: 'calc(100vh - 220px)',
         }}
       >
-        <div className="overflow-y-scroll no-scrollbar">
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="orderList">
-              {(provided) => (
-                <div
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  className="bg-white rounded-lg shadow p-4"
-                >
-                  {order.map((item, index) => (
-                    <Draggable
-                      key={`item-${index}`}
-                      draggableId={`item-${index}`}
-                      index={index}
-                    >
-                      {(provided, snapshot) => (
-                        <li
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className={`flex items-center justify-between p-3 mb-2 rounded-md ${snapshot.isDragging ? 'bg-blue-100' : item.type === 'ban' ? 'bg-red-100' : 'bg-green-100'} transition-colors duration-200 ease-in-out`}
-                        >
-                          <span className="flex items-center text-xs font-bold">
-                            {item.type === 'ban' ? (
-                              <FaBan className="text-red-500 mr-2" />
-                            ) : (
-                              <FaCheck className="text-green-500 mr-2" />
-                            )}
-                            {item.type.charAt(0).toUpperCase() +
-                              item.type.slice(1)}{' '}
-                            {index + 1}
-                            {item.player === 1 ? ' (Player 1)' : ' (Player 2)'}
-                          </span>
-                          <span className="text-gray-500 text-xs">
-                            Drag to reorder
-                          </span>
-                        </li>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-        </div>
         <div className="bg-white rounded-lg shadow p-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -214,9 +180,9 @@ const Match = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {['player1', 'player2'].map((player) => (
+                          {['1', '2'].map((player) => (
                             <SelectItem key={player} value={player}>
-                              {player.charAt(0).toUpperCase() + player.slice(1)}
+                              Player {player}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -240,9 +206,9 @@ const Match = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {['player1', 'player2'].map((player) => (
+                          {['1', '2'].map((player) => (
                             <SelectItem key={player} value={player}>
-                              {player.charAt(0).toUpperCase() + player.slice(1)}
+                              Player {player}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -254,6 +220,52 @@ const Match = () => {
               <Button type="submit">Create</Button>
             </form>
           </Form>
+        </div>
+        <div className="overflow-y-scroll no-scrollbar">
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="orderList">
+              {(provided) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className="bg-white rounded-lg shadow p-4"
+                >
+                  {order.map((item, index) => (
+                    <Draggable
+                      key={`item-${index}`}
+                      draggableId={`item-${index}`}
+                      index={index}
+                    >
+                      {(provided, snapshot) => (
+                        <li
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className={`flex items-center justify-between p-3 mb-2 rounded-md ${snapshot.isDragging ? 'bg-blue-100' : item.type === 'ban' ? 'bg-red-100' : 'bg-green-100'} transition-colors duration-200 ease-in-out`}
+                        >
+                          <span className="flex items-center text-xs font-bold">
+                            {item.type === 'ban' ? (
+                              <FaBan className="text-red-500 mr-2" />
+                            ) : (
+                              <FaCheck className="text-green-500 mr-2" />
+                            )}
+                            {item.type.charAt(0).toUpperCase() +
+                              item.type.slice(1)}{' '}
+                            {index + 1}
+                            {item.player === 1 ? ' (Player 1)' : ' (Player 2)'}
+                          </span>
+                          <span className="text-gray-500 text-xs">
+                            Drag to reorder
+                          </span>
+                        </li>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         </div>
       </div>
     </div>

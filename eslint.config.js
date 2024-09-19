@@ -14,7 +14,12 @@ export default [
   ...tseslint.configs.recommended,
   ...fixupConfigRules(pluginReactConfig),
   {
-    ignores: ['dist/*', 'node_modules/*', 'src/components/ui/*'],
+    ignores: [
+      'dist/*',
+      'node_modules/*',
+      'src/components/ui/*',
+      'src/components/hooks/*',
+    ],
   },
   {
     plugins: {
