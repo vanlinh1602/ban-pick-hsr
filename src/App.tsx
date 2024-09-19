@@ -15,6 +15,7 @@ import { MenuBar } from './features/layout/components';
 const Home = lazy(() => import('./pages/Home'));
 const Configs = lazy(() => import('./pages/Configs'));
 const Match = lazy(() => import('./pages/Match'));
+const MatchDetail = lazy(() => import('./pages/MatchDetail'));
 
 const AppLayout = () => (
   <Suspense>
@@ -35,7 +36,10 @@ function App() {
       <Route element={<AppLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/match" element={<Match />} />
+        <Route path="/match" element={<Outlet />}>
+          <Route path="" element={<Match />} />
+          <Route path=":id" element={<MatchDetail />} />
+        </Route>
         <Route path="/configs" element={<Configs />} />
         <Route path="*" element={<div>Chưa làm hehe</div>} />
       </Route>,
