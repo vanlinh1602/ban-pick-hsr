@@ -23,8 +23,6 @@ const MatchDetail = () => {
     }
   }, []);
 
-  console.log(matchData);
-
   return (
     <div>
       {handling ? <Waiting /> : null}

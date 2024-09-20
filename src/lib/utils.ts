@@ -25,7 +25,5 @@ export const determineTurn = (
       ...chunk.map(() => ({ player: index % 2 ? 1 : 2, type: 'pick' })),
     );
   });
-  console.log(newOrder);
-
   return newOrder;
 };
