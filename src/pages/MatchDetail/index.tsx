@@ -26,7 +26,11 @@ const MatchDetail = () => {
   return (
     <div>
       {handling ? <Waiting /> : null}
-      {matchData?.status === 'ban-pick' ? <BanPick id={id!} /> : <MatchLive />}
+      {matchData?.status === 'ban-pick' ? (
+        <BanPick id={id!} />
+      ) : (
+        <MatchLive id={id!} />
+      )}
     </div>
   );
 };

@@ -1,34 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FaExpand, FaPlay, FaVolumeUp } from 'react-icons/fa';
+import { useSelector } from 'react-redux';
 
-const MatchLive = () => {
-  const [isLive, setIsLive] = useState(true);
-  const [score, setScore] = useState({ team1: 0, team2: 0 });
-  const [currentTime, setCurrentTime] = useState(new Date());
+import characters from '@/data/character.json';
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+import { selectMatchData } from '../../store/selectors';
+import { Character } from '../../types';
 
-  const matchDetails = {
-    tournament: 'Summer Championship 2023',
-    team1: 'Dragon Warriors',
-    team2: 'Phoenix Risers',
-    date: '2023-07-15',
-  };
+type Props = {
+  id: string;
+};
 
-  const picks = {
-    team1: ['Hero1', 'Hero2', 'Hero3', 'Hero4', 'Hero5'],
-    team2: ['Champion1', 'Champion2', 'Champion3', 'Champion4', 'Champion5'],
-  };
-
-  const bans = {
-    team1: ['Ban1', 'Ban2', 'Ban3'],
-    team2: ['Ban4', 'Ban5', 'Ban6'],
-  };
+const MatchLive = ({ id }: Props) => {
+  const [isLive] = useState(true);
+  const [score] = useState({ team1: 0, team2: 0 });
+  const [currentTime] = useState(new Date());
+  const matchDetail = useSelector((state: any) => selectMatchData(state, id));
 
   const lineups = {
     team1: [
@@ -46,6 +33,31 @@ const MatchLive = () => {
       { name: 'Player10', role: 'Support' },
     ],
   };
+
+  const { playerData } = useMemo(() => {
+    const mathInfo: {
+      playerData: CustomObject<{
+        bans: Character[];
+        picks: Character[];
+      }>;
+    } = {
+      playerData: {
+        player1: { bans: [], picks: [] },
+        player2: { bans: [], picks: [] },
+      },
+    };
+    matchDetail.matchSetup?.banPickStatus.forEach((status) => {
+      const character = characters.find((char) => {
+        return char.entry_page_id === status.character;
+      });
+      if (status.type === 'ban') {
+        mathInfo.playerData[`player${status.player}`].bans.push(character!);
+      } else {
+        mathInfo.playerData[`player${status.player}`].picks.push(character!);
+      }
+    });
+    return mathInfo;
+  }, [matchDetail.matchSetup?.banPickStatus]);
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100">
@@ -90,84 +102,92 @@ const MatchLive = () => {
       {/* Right Column - Match Information */}
       <div className="md:w-1/3 p-4 overflow-y-auto">
         <div className="bg-white rounded-lg shadow-md p-6 mb-4">
-          <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
-            {matchDetails.tournament}
-          </h2>
           <div className="flex justify-between items-center mb-4">
             <div className="text-center">
               <h3 className="text-xl font-semibold text-blue-600">
-                {matchDetails.team1}
+                {matchDetail.players[0].name}
               </h3>
               <p className="text-3xl font-bold">{score.team1}</p>
             </div>
             <div className="text-2xl font-bold text-gray-600">vs</div>
             <div className="text-center">
               <h3 className="text-xl font-semibold text-red-600">
-                {matchDetails.team2}
+                {matchDetail.players[1].name}
               </h3>
               <p className="text-3xl font-bold">{score.team2}</p>
             </div>
           </div>
           <p className="text-center text-gray-600">
-            {matchDetails.date} - {currentTime.toLocaleTimeString()}
+            {} - {currentTime.toLocaleTimeString()}
           </p>
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6 mb-4">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800">
-            Picks & Bans
-          </h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h4 className="font-semibold text-blue-600 mb-2">
-                {matchDetails.team1} Picks
-              </h4>
-              <ul className="list-disc list-inside">
-                {picks.team1.map((pick, index) => (
-                  <li key={index} className="text-gray-700">
-                    {pick}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-red-600 mb-2">
-                {matchDetails.team2} Picks
-              </h4>
-              <ul className="list-disc list-inside">
-                {picks.team2.map((pick, index) => (
-                  <li key={index} className="text-gray-700">
-                    {pick}
-                  </li>
-                ))}
-              </ul>
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">Bans</h3>
+          <div className="grid grid-cols-1 gap-4">
+            <div className="flex space-x-2 mt-1 items-center">
+              <div className="font-semibold text-blue-600 w-1/3 text-start">
+                {matchDetail.players[0].name} Bans:
+              </div>
+              {playerData.player1.bans.map((char) => {
+                return (
+                  <img
+                    key={char.entry_page_id}
+                    src={char.icon_url}
+                    alt={char.name}
+                    className="w-8 h-8 rounded-full"
+                  />
+                );
+              })}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <div>
-              <h4 className="font-semibold text-blue-600 mb-2">
-                {matchDetails.team1} Bans
-              </h4>
-              <ul className="list-disc list-inside">
-                {bans.team1.map((ban, index) => (
-                  <li key={index} className="text-gray-700">
-                    {ban}
-                  </li>
-                ))}
-              </ul>
+          <div className="flex space-x-2 mt-1 items-center">
+            <div className="font-semibold text-red-600 w-1/3 text-start">
+              {matchDetail.players[1].name} Bans:
             </div>
-            <div>
-              <h4 className="font-semibold text-red-600 mb-2">
-                {matchDetails.team2} Bans
-              </h4>
-              <ul className="list-disc list-inside">
-                {bans.team2.map((ban, index) => (
-                  <li key={index} className="text-gray-700">
-                    {ban}
-                  </li>
-                ))}
-              </ul>
+            {playerData.player2.bans.map((char) => {
+              return (
+                <img
+                  key={char.entry_page_id}
+                  src={char.icon_url}
+                  alt={char.name}
+                  className="w-8 h-8 rounded-full"
+                />
+              );
+            })}
+          </div>
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">Picks</h3>
+          <div className="grid grid-cols-1 gap-4">
+            <div className="flex space-x-2 mt-1 items-center">
+              <div className="font-semibold text-blue-600 w-1/3 text-start">
+                {matchDetail.players[0].name} Bans:
+              </div>
+              {playerData.player1.picks.map((char) => {
+                return (
+                  <img
+                    key={char.entry_page_id}
+                    src={char.icon_url}
+                    alt={char.name}
+                    className="w-8 h-8 rounded-full"
+                  />
+                );
+              })}
             </div>
+          </div>
+          <div className="flex space-x-2 mt-1 items-center">
+            <div className="font-semibold text-red-600 w-1/3 text-start">
+              {matchDetail.players[1].name} Bans:
+            </div>
+            {playerData.player2.picks.map((char) => {
+              return (
+                <img
+                  key={char.entry_page_id}
+                  src={char.icon_url}
+                  alt={char.name}
+                  className="w-8 h-8 rounded-full"
+                />
+              );
+            })}
           </div>
         </div>
 
@@ -178,7 +198,7 @@ const MatchLive = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <h4 className="font-semibold text-blue-600 mb-2">
-                {matchDetails.team1}
+                {matchDetail.players[0].name}
               </h4>
               <ul className="space-y-2">
                 {lineups.team1.map((player, index) => (
@@ -191,7 +211,7 @@ const MatchLive = () => {
             </div>
             <div>
               <h4 className="font-semibold text-red-600 mb-2">
-                {matchDetails.team2}
+                {matchDetail.players[1].name}
               </h4>
               <ul className="space-y-2">
                 {lineups.team2.map((player, index) => (
