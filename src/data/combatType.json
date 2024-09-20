@@ -1,0 +1,51 @@
+[
+  {
+    "id": "1285",
+    "value": "Quantum",
+    "mi18n_key": "filter_1285",
+    "icon": "https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/2d33de43649b480e1d6a9fdb6599b2cb_7381386544905042228.png",
+    "enum_string": "quantum"
+  },
+  {
+    "id": "1297",
+    "value": "Physical",
+    "mi18n_key": "filter_1297",
+    "icon": "https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/43a362875c2955a66ef6cd9236dbf57d_7293610557288342137.png",
+    "enum_string": "physical"
+  },
+  {
+    "id": "1314",
+    "value": "Wind",
+    "mi18n_key": "filter_1314",
+    "icon": "https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/8d2992ae95dfe1469af254b923b1129c_5790926101190505253.png",
+    "enum_string": "wind"
+  },
+  {
+    "id": "1322",
+    "value": "Fire",
+    "mi18n_key": "filter_1322",
+    "icon": "https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/ade90b393f1dfffe731766ed98c78746_8365675559481569213.png",
+    "enum_string": "fire"
+  },
+  {
+    "id": "1341",
+    "value": "Imaginary",
+    "mi18n_key": "filter_1341",
+    "icon": "https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/9ab11de799de29f5c6abbac0a2b305e1_7514369334565575603.png",
+    "enum_string": "imaginary"
+  },
+  {
+    "id": "1357",
+    "value": "Lightning",
+    "mi18n_key": "filter_1357",
+    "icon": "https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/c3bf245ff0e28fab91b126fa8a24917b_5287731351692004917.png",
+    "enum_string": "lightning"
+  },
+  {
+    "id": "1371",
+    "value": "Ice",
+    "mi18n_key": "filter_1371",
+    "icon": "https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/e7fda5adc3b8ee20cef753b61ff0ed08_8813940564670780996.png",
+    "enum_string": "ice"
+  }
+]

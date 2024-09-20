@@ -1,0 +1,51 @@
+[
+  {
+    "id": "1384",
+    "value": "The Destruction",
+    "mi18n_key": "filter_1384",
+    "icon": "https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/715197244815c84eaf80b1644af7d9bc_5620687503360171464.png",
+    "enum_string": "destruction"
+  },
+  {
+    "id": "1394",
+    "value": "The Hunt",
+    "mi18n_key": "filter_1394",
+    "icon": "https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/c7aa25b129ea061e89c1c5f8b65c6686_7961003512756860180.png",
+    "enum_string": "hunt"
+  },
+  {
+    "id": "1405",
+    "value": "The Erudition",
+    "mi18n_key": "filter_1405",
+    "icon": "https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/a8458ce1c20e430c14ef937a260c0863_3461382062600394571.png",
+    "enum_string": "erudition"
+  },
+  {
+    "id": "1421",
+    "value": "The Harmony",
+    "mi18n_key": "filter_1421",
+    "icon": "https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/e84ddead5d9a26c3827428cb4358f05e_5825200323544808775.png",
+    "enum_string": "harmony"
+  },
+  {
+    "id": "1429",
+    "value": "The Nihility",
+    "mi18n_key": "filter_1429",
+    "icon": "https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/022ca2fa7843ec5dcbc882e6b99d3849_5658173062357230596.png",
+    "enum_string": "nihility"
+  },
+  {
+    "id": "1445",
+    "value": "The Preservation",
+    "mi18n_key": "filter_1445",
+    "icon": "https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/b60f0820cb22a4d9817befd2f53bb30a_4519413180795083617.png",
+    "enum_string": "preservation"
+  },
+  {
+    "id": "1454",
+    "value": "The Abundance",
+    "mi18n_key": "filter_1454",
+    "icon": "https://act-webstatic.hoyoverse.com/event-static-hoyowiki-admin/2024/03/27/b9d6d0e7ab963fd6c6ee778e826be66e_2240319466702070435.png",
+    "enum_string": "abundance"
+  }
+]
