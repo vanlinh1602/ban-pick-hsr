@@ -5,7 +5,7 @@ import { toast } from '@/components/hooks/use-toast';
 import { backendService } from '@/services';
 import formatError from '@/utils/formatError';
 
-import { Match, MatchSetUpInfo } from '../types';
+import { Match } from '../types';
 import { actions as matchActions } from './reducer';
 
 function* getMatch(action: PayloadAction<string>) {
@@ -39,7 +39,7 @@ function* getMatch(action: PayloadAction<string>) {
 
 function* createMatch(
   action: PayloadAction<{
-    mathInfo: MatchSetUpInfo;
+    mathInfo: Partial<Match>;
     onSuccess: (id: string) => void;
   }>,
 ) {
@@ -70,9 +70,38 @@ function* createMatch(
   }
 }
 
+function* updateMatch(action: PayloadAction<Match>) {
+  try {
+    const match = action.payload;
+
+    const result: WithApiResult<Match> = yield backendService.post(
+      '/match/update',
+      { match },
+    );
+    if (result.kind === 'ok') {
+      yield put(matchActions.fetchMatch(result.data));
+    } else {
+      yield put(matchActions.updateHanding(false));
+      toast({
+        variant: 'destructive',
+        title: 'Failed',
+        description: formatError(result),
+      });
+    }
+  } catch (err) {
+    matchActions.updateHanding(false);
+    toast({
+      variant: 'destructive',
+      title: 'Failed',
+      description: formatError(err),
+    });
+  }
+}
+
 export default function* saga() {
   yield all([
     takeLatest(matchActions.getMatch.type, getMatch),
     takeLatest(matchActions.createMatch.type, createMatch),
+    takeLatest(matchActions.updateMatch.type, updateMatch),
   ]);
 }

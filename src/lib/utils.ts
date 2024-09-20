@@ -14,12 +14,18 @@ export const determineTurn = (
     { player: 1, type: 'ban' },
   ];
   _.chunk(range(1, ban), 2).forEach((chunk, index) => {
-    newOrder.push(...chunk.map(() => ({ player: index % 2, type: 'ban' })));
+    newOrder.push(
+      ...chunk.map(() => ({ player: index % 2 ? 1 : 2, type: 'ban' })),
+    );
   });
 
   newOrder.push({ player: 1, type: 'pick' });
   _.chunk(range(1, pick), 2).forEach((chunk, index) => {
-    newOrder.push(...chunk.map(() => ({ player: index % 2, type: 'pick' })));
+    newOrder.push(
+      ...chunk.map(() => ({ player: index % 2 ? 1 : 2, type: 'pick' })),
+    );
   });
+  console.log(newOrder);
+
   return newOrder;
 };

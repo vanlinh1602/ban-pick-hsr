@@ -1,11 +1,13 @@
 import { PayloadAction } from '@reduxjs/toolkit';
+import _ from 'lodash';
 
 import { createSlice } from '@/utils/@reduxjs/toolkit';
 
-import type { Match, MatchSetUpInfo, MatchState } from '../types';
+import type { Match, MatchState } from '../types';
 
 export const initialState: MatchState = {
   handling: false,
+  data: {},
 };
 
 const slice = createSlice({
@@ -31,10 +33,20 @@ const slice = createSlice({
     createMatch(
       state,
       _action: PayloadAction<{
-        mathInfo: MatchSetUpInfo;
+        mathInfo: Partial<Match>;
         onSuccess: (id: string) => void;
       }>,
     ) {
+      state.handling = true;
+    },
+    modifyMatch(
+      state,
+      action: PayloadAction<{ id: string; patch: string[]; data: any }>,
+    ) {
+      const { id, patch, data } = action.payload;
+      _.set(state.data, [id, ...patch], data);
+    },
+    updateMatch(state, _action: PayloadAction<Match>) {
       state.handling = true;
     },
   },

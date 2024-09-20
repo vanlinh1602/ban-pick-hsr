@@ -35,7 +35,7 @@ type ValueType = {
 
 export type MatchSetUpInfo = {
   banPickStatus: {
-    player: string;
+    player: number;
     type: 'ban' | 'pick';
     character?: string;
   }[];
@@ -45,7 +45,7 @@ export type MatchSetUpInfo = {
 
 export type Match = {
   id: string;
-  players: [string, string];
+  players: { name: string; id: string }[];
   status: 'ban-pick' | 'playing' | 'finished';
   date?: number;
   winner?: string;
@@ -58,5 +58,5 @@ export type Match = {
 
 export type MatchState = {
   handling: boolean;
-  data?: CustomObject<Match>;
+  data: CustomObject<Match>;
 };

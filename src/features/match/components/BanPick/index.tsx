@@ -1,7 +1,9 @@
+import _ from 'lodash';
 import { Grid2X2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { FaCheck, FaUser } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { Input } from '@/components/ui/input';
 import {
@@ -15,14 +17,9 @@ import characters from '@/data/character.json';
 import combatTypes from '@/data/combatType.json';
 import paths from '@/data/path.json';
 
+import { useMatchSlice } from '../../store';
 import { selectMatchData } from '../../store/selectors';
 import { Character } from '../../types';
-
-type UserInfo = {
-  name: string;
-  bans: Character[];
-  picks: Character[];
-};
 
 type Filter = {
   path?: string;
@@ -35,39 +32,62 @@ type Props = {
 };
 
 const BanPick = ({ id }: Props) => {
+  const dispatch = useDispatch();
+  const { actions } = useMatchSlice();
   const matchData = useSelector((state: any) => selectMatchData(state, id));
   const { matchSetup } = matchData || {};
-  const [activeUser, setActiveUser] = useState<string>(
-    matchSetup?.firstPick === 1 ? 'left' : 'right',
-  );
-  const [turn, setTurn] = useState<number>(0);
   const [filter, setFilter] = useState<Filter>();
-  const [leftUser, setLeftUser] = useState<UserInfo>({
-    name: 'Player 1',
-    bans: [],
-    picks: [],
-  });
-  const [rightUser, setRightUser] = useState<UserInfo>({
-    name: 'Player 2',
-    bans: [],
-    picks: [],
-  });
+
   const [availableCharacters, setAvailableCharacters] =
     useState<Character[]>(characters);
   const [selectCharacter, setSelectCharacter] = useState<Character>();
 
-  const selectedCharacters = useMemo(() => {
-    return leftUser.bans.concat(
-      rightUser.bans,
-      leftUser.picks,
-      rightUser.picks,
-    );
-  }, [leftUser, rightUser]);
+  const { turn, activeTurn, playerData, selectedCharacters } = useMemo(() => {
+    const data: {
+      turn: number;
+      activeTurn: {
+        player: number;
+        type: 'ban' | 'pick';
+        character?: string;
+      };
+      playerData: CustomObject<{
+        bans: string[];
+        picks: string[];
+      }>;
+      selectedCharacters: string[];
+    } = {
+      turn: 0,
+      activeTurn: { player: 0, type: 'ban', character: '' },
+      playerData: {
+        player1: { bans: [], picks: [] },
+        player2: { bans: [], picks: [] },
+      },
+      selectedCharacters: [],
+    };
+    matchData.matchSetup?.banPickStatus.every((status, index) => {
+      if (!status.character) {
+        data.turn = index;
+        data.activeTurn = status;
+        return false;
+      }
+      if (status.type === 'ban') {
+        data.playerData[`player${status.player}`].bans.push(status.character);
+      } else {
+        data.playerData[`player${status.player}`].picks.push(status.character);
+      }
+      data.selectedCharacters.push(status.character);
+      return true;
+    });
+
+    return data;
+  }, [matchData.matchSetup?.banPickStatus]);
 
   // Filter characters based on selected filters
   useEffect(() => {
     const filteredCharacters = characters.filter((char) => {
-      if (selectedCharacters.find((selected) => selected === char))
+      if (
+        selectedCharacters.find((selected) => selected === char.entry_page_id)
+      )
         return false;
       if (
         filter?.path &&
@@ -93,48 +113,27 @@ const BanPick = ({ id }: Props) => {
       return true;
     });
     setAvailableCharacters(filteredCharacters);
-  }, [filter]);
+  }, [filter, selectedCharacters]);
 
   const handleConfirm = () => {
     if (!selectCharacter) return;
+    const banPickStatus = _.cloneDeep(matchSetup?.banPickStatus) || [];
+    _.set(banPickStatus, [turn, 'character'], selectCharacter.entry_page_id);
 
-    const updatedAvailableCharacters = availableCharacters.filter(
-      (char) => char.entry_page_id !== selectCharacter.entry_page_id,
+    dispatch(
+      actions.modifyMatch({
+        id,
+        patch: ['matchSetup', 'banPickStatus'],
+        data: banPickStatus,
+      }),
     );
-    const activeTurn = matchSetup?.banPickStatus[turn];
-
-    if (activeTurn?.type === 'ban') {
-      if (activeUser === 'left') {
-        setLeftUser({
-          ...leftUser,
-          bans: [...leftUser.bans, selectCharacter],
-        });
-      } else {
-        setRightUser({
-          ...rightUser,
-          bans: [...rightUser.bans, selectCharacter],
-        });
-      }
-    } else if (activeUser === 'left') {
-      setLeftUser({
-        ...leftUser,
-        picks: [...leftUser.picks, selectCharacter],
-      });
-    } else {
-      setRightUser({
-        ...rightUser,
-        picks: [...rightUser.picks, selectCharacter],
-      });
-    }
-
-    setAvailableCharacters(updatedAvailableCharacters);
     setSelectCharacter(undefined);
-    setActiveUser((prev) => {
-      const nextTurn = matchSetup?.banPickStatus[turn + 1];
-      if (!nextTurn) return prev;
-      return nextTurn.player === '1' ? 'left' : 'right';
-    });
-    setTurn((pre) => pre + 1);
+  };
+
+  const handleStartGame = () => {
+    const match = _.cloneDeep(matchData);
+    match.status = 'playing';
+    dispatch(actions.updateMatch(match));
   };
 
   const renderCharacterGrid = () => {
@@ -146,7 +145,7 @@ const BanPick = ({ id }: Props) => {
             ? 'ring-4 ring-blue-500'
             : 'hover:ring-2 hover:ring-gray-300'
         } flex flex-col items-center w-full h-full`}
-        disabled={turn > (matchSetup?.banPickStatus?.length || 0)}
+        disabled={!activeTurn.player}
         onClick={() => setSelectCharacter(character)}
       >
         <img
@@ -159,54 +158,57 @@ const BanPick = ({ id }: Props) => {
     ));
   };
 
-  const renderUserSection = (user: UserInfo, side: string) => {
+  const renderUserSection = (player: number) => {
+    const playerInfo = matchData.players?.[player - 1];
+    const playerMatchData = playerData[`player${player}`];
     return (
       <div
-        className={`flex flex-col items-center ${
-          side === 'left' ? 'order-first' : 'order-last'
+        className={`flex flex-col items-center w-40 ${
+          player === 1 ? 'order-first' : 'order-last'
         }`}
       >
         <div
           className={`w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center ${
-            activeUser === side ? 'ring-4 ring-yellow-400' : ''
+            activeTurn.player === player ? 'ring-4 ring-yellow-400' : ''
           }`}
         >
           <FaUser className="text-4xl text-gray-600" />
         </div>
-        <input
-          type="text"
-          value={user.name}
-          onChange={(e) =>
-            side === 'left'
-              ? setLeftUser({ ...leftUser, name: e.target.value })
-              : setRightUser({ ...rightUser, name: e.target.value })
-          }
-          className="mt-2 p-1 border rounded text-center"
-        />
+        <span className="mt-2 p-1 text-center">{playerInfo.name}</span>
         <div className="mt-4">
           <h3 className="font-bold">Bans:</h3>
           <div className="flex space-x-2 mt-1">
-            {user.bans.map((ban: Character) => (
-              <img
-                key={ban.entry_page_id}
-                src={ban.icon_url}
-                alt={ban.name}
-                className="w-10 h-10 rounded-full"
-              />
-            ))}
+            {playerMatchData.bans.map((ban) => {
+              const char = characters.find(
+                (character) => character.entry_page_id === ban,
+              );
+              return (
+                <img
+                  key={char!.entry_page_id}
+                  src={char!.icon_url}
+                  alt={char!.name}
+                  className="w-10 h-10 rounded-full"
+                />
+              );
+            })}
           </div>
         </div>
         <div className="mt-4">
           <h3 className="font-bold">Picks:</h3>
           <div className="flex space-x-2 mt-1">
-            {user.picks.map((pick) => (
-              <img
-                key={pick.entry_page_id}
-                src={pick.icon_url}
-                alt={pick.name}
-                className="w-10 h-10 rounded-full"
-              />
-            ))}
+            {playerMatchData.picks.map((pick) => {
+              const char = characters.find(
+                (character) => character.entry_page_id === pick,
+              );
+              return (
+                <img
+                  key={char!.entry_page_id}
+                  src={char!.icon_url}
+                  alt={char!.name}
+                  className="w-10 h-10 rounded-full"
+                />
+              );
+            })}
           </div>
         </div>
       </div>
@@ -221,17 +223,17 @@ const BanPick = ({ id }: Props) => {
       >
         <div className="p-8">
           <h2 className="text-2xl font-bold text-center mb-8">
-            {matchSetup?.banPickStatus?.[turn] ? (
+            {activeTurn.player ? (
               <>
-                {activeUser === 'left' ? leftUser.name : rightUser.name} (
-                {matchSetup?.banPickStatus[turn]?.type.toUpperCase()} Phase)
+                {matchData.players?.[activeTurn.player - 1]?.name} (
+                {activeTurn.type.toUpperCase()} Phase)
               </>
             ) : (
               'Ban Pick phase is over'
             )}
           </h2>
           <div className="flex justify-between items-start">
-            {renderUserSection(leftUser, 'left')}
+            {renderUserSection(1)}
             <div className="flex-1 mx-8 ">
               <div className="flex mb-4 justify-around">
                 <div className="flex items-center">
@@ -328,9 +330,19 @@ const BanPick = ({ id }: Props) => {
                 >
                   <FaCheck className="inline-block mr-2" /> Confirm
                 </button>
+                {!activeTurn.player && (
+                  <button
+                    onClick={handleStartGame}
+                    className={
+                      'px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-800 transition-colors duration-300 '
+                    }
+                  >
+                    Start Game
+                  </button>
+                )}
               </div>
             </div>
-            {renderUserSection(rightUser, 'right')}
+            {renderUserSection(2)}
           </div>
         </div>
       </div>

@@ -21,6 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -29,7 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useMatchSlice } from '@/features/match/store';
-import { MatchSetUpInfo } from '@/features/match/types';
+import { Match as MatchType } from '@/features/match/types';
 import { determineTurn } from '@/lib/utils';
 
 const Match = () => {
@@ -50,6 +51,8 @@ const Match = () => {
     numPicks: z.string(),
     firstPick: z.string(),
     goFirst: z.string(),
+    player1: z.string(),
+    player2: z.string(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -59,17 +62,31 @@ const Match = () => {
       numPicks: '2',
       firstPick: '1',
       goFirst: '1',
+      player1: 'Player 1',
+      player2: 'Player 2',
     },
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    const matchInfo: MatchSetUpInfo = {
-      firstPick: Number(values.firstPick),
-      goFirst: Number(values.goFirst),
-      banPickStatus: order.map((item) => ({
-        player: 'Player ' + item.player,
-        type: item.type as 'ban' | 'pick',
-      })),
+    const matchInfo: Partial<MatchType> = {
+      players: [
+        {
+          name: values.player1,
+          id: '1',
+        },
+        {
+          name: values.player2,
+          id: '2',
+        },
+      ],
+      matchSetup: {
+        firstPick: Number(values.firstPick),
+        goFirst: Number(values.goFirst),
+        banPickStatus: order.map((item) => ({
+          player: item.player,
+          type: item.type as 'ban' | 'pick',
+        })),
+      },
     };
     dispatch(
       actions.createMatch({
@@ -105,6 +122,82 @@ const Match = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <h2 className="text-2xl font-bold">Match Details</h2>
               <div className="grid grid-cols-2 gap-5 text-start">
+                <FormField
+                  control={form.control}
+                  name="player1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Player Name 1</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="player2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>PLayer Name 2</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="firstPick"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>First Pick</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a verified email to display" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {['1', '2'].map((player) => (
+                            <SelectItem key={player} value={player}>
+                              Player {player}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="goFirst"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Go First</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a verified email to display" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {['1', '2'].map((player) => (
+                            <SelectItem key={player} value={player}>
+                              Player {player}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="numBans"
@@ -161,58 +254,6 @@ const Match = () => {
                         </SelectContent>
                       </Select>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="firstPick"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Pick</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value.toString()}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a verified email to display" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {['1', '2'].map((player) => (
-                            <SelectItem key={player} value={player}>
-                              Player {player}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="goFirst"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Go First</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value.toString()}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a verified email to display" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {['1', '2'].map((player) => (
-                            <SelectItem key={player} value={player}>
-                              Player {player}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
                     </FormItem>
                   )}
                 />
