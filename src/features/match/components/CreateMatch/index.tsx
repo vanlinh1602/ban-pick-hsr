@@ -109,7 +109,7 @@ const CreateMatch = () => {
   };
   return (
     <div
-      className="grid grid-cols-2 gap-4"
+      className="flex flex-col md:grid md:grid-cols-2 gap-4 overflow-y-scroll "
       style={{
         height: 'calc(100vh - 220px)',
       }}
@@ -259,7 +259,7 @@ const CreateMatch = () => {
           </form>
         </Form>
       </div>
-      <div className="overflow-y-scroll no-scrollbar">
+      <div className="md:overflow-y-scroll md:no-scrollbar">
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="orderList">
             {(provided) => (

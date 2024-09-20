@@ -50,8 +50,9 @@ export type Match = {
   date?: number;
   winner?: string;
   games?: {
-    player: string;
+    player: number;
     characters: string[];
+    points: number;
   }[];
   matchSetup?: MatchSetUpInfo;
 };
