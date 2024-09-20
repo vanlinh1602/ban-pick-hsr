@@ -45,6 +45,7 @@
     "redux-injectors": "^2.1.0",
     "redux-saga": "1.2.3",
     "remixicon": "^4.3.0",
+    "socket.io-client": "^4.7.5",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"

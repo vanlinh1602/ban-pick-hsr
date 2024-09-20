@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { FaCheck, FaUser } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
+import io from 'socket.io-client';
 
 import { Input } from '@/components/ui/input';
 import {
@@ -13,13 +14,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { BACKEND } from '@/config';
 import characters from '@/data/character.json';
 import combatTypes from '@/data/combatType.json';
 import paths from '@/data/path.json';
 
 import { useMatchSlice } from '../../store';
 import { selectMatchData } from '../../store/selectors';
-import { Character } from '../../types';
+import { Character, Match } from '../../types';
+
+const socket = io(BACKEND);
 
 type Filter = {
   path?: string;
@@ -37,6 +41,7 @@ const BanPick = ({ id }: Props) => {
   const matchData = useSelector((state: any) => selectMatchData(state, id));
   const { matchSetup } = matchData || {};
   const [filter, setFilter] = useState<Filter>();
+  console.log('id', id);
 
   const [availableCharacters, setAvailableCharacters] =
     useState<Character[]>(characters);
@@ -81,6 +86,17 @@ const BanPick = ({ id }: Props) => {
 
     return data;
   }, [matchData.matchSetup?.banPickStatus]);
+
+  useEffect(() => {
+    socket.emit('join_room', { room: id });
+    socket.on('updateMatch', (data: Match) => {
+      dispatch(actions.fetchMatch(data));
+    });
+    return () => {
+      socket.emit('leave_room', id);
+      socket.disconnect();
+    };
+  }, []);
 
   // Filter characters based on selected filters
   useEffect(() => {
@@ -127,12 +143,16 @@ const BanPick = ({ id }: Props) => {
         data: banPickStatus,
       }),
     );
+    const matchUpdate = _.cloneDeep(matchData);
+    _.set(matchUpdate, ['matchSetup', 'banPickStatus'], banPickStatus);
+    socket.emit('syncMatch', { match: matchUpdate, room: id });
     setSelectCharacter(undefined);
   };
 
   const handleStartGame = () => {
     const match = _.cloneDeep(matchData);
     match.status = 'playing';
+    socket.emit('syncMatch', { match, room: id });
     dispatch(actions.updateMatch(match));
   };
 
