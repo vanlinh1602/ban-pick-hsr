@@ -17,14 +17,8 @@ const MatchDetail = () => {
   const handling = useSelector(selectMatchHandling);
   const matchData = useSelector((state: any) => selectMatchData(state, id!));
 
-  console.log('matchData', id);
-
   useEffect(() => {
-    console.log('render', id);
-
     if (id) {
-      console.log('getMatch', id);
-
       dispatch(actions.getMatch(id));
     }
   }, [actions, dispatch, id]);

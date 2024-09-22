@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/select';
 import { useMatchSlice } from '@/features/match/store';
 import { Match as MatchType } from '@/features/match/types';
-import { determineTurn } from '@/lib/utils';
+import { determineTurn, generateID } from '@/lib/utils';
 
 const CreateMatch = () => {
   const navigate = useNavigate();
@@ -39,12 +39,13 @@ const CreateMatch = () => {
   const { actions } = useMatchSlice();
   const [numBans, setNumBans] = useState(2);
   const [numPicks, setNumPicks] = useState(2);
+  const [firstPick, setFirstPick] = useState(1);
   const [order, setOrder] = useState<{ player: number; type: string }[]>([]);
 
   useEffect(() => {
-    const newOrder = determineTurn(numBans, numPicks);
+    const newOrder = determineTurn(numBans, numPicks, firstPick);
     setOrder(newOrder);
-  }, [numBans, numPicks]);
+  }, [numBans, numPicks, firstPick]);
 
   const formSchema = z.object({
     numBans: z.string(),
@@ -72,11 +73,11 @@ const CreateMatch = () => {
       players: [
         {
           name: values.player1,
-          id: '1',
+          id: generateID(),
         },
         {
           name: values.player2,
-          id: '2',
+          id: generateID(),
         },
       ],
       matchSetup: {
@@ -150,7 +151,10 @@ const CreateMatch = () => {
                   <FormItem>
                     <FormLabel>First Pick</FormLabel>
                     <Select
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => {
+                        setFirstPick(parseInt(value));
+                        field.onChange(value);
+                      }}
                       defaultValue={field.value.toString()}
                     >
                       <FormControl>

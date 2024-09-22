@@ -25,11 +25,15 @@ const JoinMatch = () => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {},
+    defaultValues: {
+      securityId: '',
+    },
   });
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    navigate(`/match/${data.matchId}`);
+    navigate(`/match/${data.matchId}`, {
+      state: { securityId: data.securityId },
+    });
   };
 
   return (

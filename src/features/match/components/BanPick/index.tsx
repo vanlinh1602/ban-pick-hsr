@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { FaCheck, FaUser } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
-import io from 'socket.io-client';
+import { useLocation } from 'react-router-dom';
 
 import { Input } from '@/components/ui/input';
 import {
@@ -14,16 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { BACKEND } from '@/config';
 import characters from '@/data/character.json';
 import combatTypes from '@/data/combatType.json';
 import paths from '@/data/path.json';
+import { socket } from '@/services/socket';
 
 import { useMatchSlice } from '../../store';
 import { selectMatchData } from '../../store/selectors';
 import { Character, Match } from '../../types';
-
-const socket = io(BACKEND);
 
 type Filter = {
   path?: string;
@@ -37,11 +35,14 @@ type Props = {
 
 const BanPick = ({ id }: Props) => {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const { state } = location;
+
   const { actions } = useMatchSlice();
   const matchData = useSelector((state: any) => selectMatchData(state, id));
   const { matchSetup } = matchData || {};
+  const [player, setPlayer] = useState<number>();
   const [filter, setFilter] = useState<Filter>();
-  console.log('id', id);
 
   const [availableCharacters, setAvailableCharacters] =
     useState<Character[]>(characters);
@@ -88,15 +89,27 @@ const BanPick = ({ id }: Props) => {
   }, [matchData.matchSetup?.banPickStatus]);
 
   useEffect(() => {
-    socket.emit('join_room', { room: id });
+    socket.emit('join_room', { room: id, player: state?.securityId });
     socket.on('updateMatch', (data: Match) => {
       dispatch(actions.fetchMatch(data));
     });
+    setPlayer(player);
     return () => {
-      socket.emit('leave_room', id);
-      socket.disconnect();
+      socket.emit('leave_room', { room: id, player: state?.securityId });
     };
-  }, []);
+  }, [state?.securityId]);
+
+  useEffect(() => {
+    const { securityId } = state || {};
+    if (securityId) {
+      const findedPlayer = matchData.players?.findIndex((p) => {
+        return p.id === securityId;
+      });
+      if (findedPlayer !== -1) {
+        setPlayer(findedPlayer + 1);
+      }
+    }
+  }, [matchData]);
 
   // Filter characters based on selected filters
   useEffect(() => {
@@ -165,7 +178,7 @@ const BanPick = ({ id }: Props) => {
             ? 'ring-4 ring-blue-500'
             : 'hover:ring-2 hover:ring-gray-300'
         } flex flex-col items-center w-full h-full`}
-        disabled={!activeTurn.player}
+        disabled={player !== activeTurn.player}
         onClick={() => setSelectCharacter(character)}
       >
         <img
@@ -239,7 +252,7 @@ const BanPick = ({ id }: Props) => {
     <div className="bg-gray-100 p-8">
       <div
         className="max-w-full mx-auto bg-white rounded-xl shadow-md overflow-hidden"
-        style={{ height: 'calc(100vh - 140px)' }}
+        style={player ? { height: 'calc(100vh - 140px)' } : undefined}
       >
         <div className="p-8">
           <h2 className="text-2xl font-bold text-center mb-8">
@@ -340,27 +353,29 @@ const BanPick = ({ id }: Props) => {
               >
                 {renderCharacterGrid()}
               </div>
-              <div className="mt-1 flex justify-center space-x-4">
-                <button
-                  onClick={handleConfirm}
-                  className={`px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-300 ${
-                    !selectCharacter ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                  disabled={!selectCharacter}
-                >
-                  <FaCheck className="inline-block mr-2" /> Confirm
-                </button>
-                {!activeTurn.player && (
+              {player && (
+                <div className="mt-1 flex justify-center space-x-4">
                   <button
-                    onClick={handleStartGame}
-                    className={
-                      'px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-800 transition-colors duration-300 '
-                    }
+                    onClick={handleConfirm}
+                    className={`px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-300 ${
+                      !selectCharacter ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                    disabled={!selectCharacter || player !== activeTurn.player}
                   >
-                    Start Game
+                    <FaCheck className="inline-block mr-2" /> Confirm
                   </button>
-                )}
-              </div>
+                  {!activeTurn.player && (
+                    <button
+                      onClick={handleStartGame}
+                      className={
+                        'px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-800 transition-colors duration-300 '
+                      }
+                    >
+                      Start Game
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
             {renderUserSection(2)}
           </div>
