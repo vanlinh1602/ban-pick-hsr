@@ -6,6 +6,11 @@ import { initialState } from './reducer';
 
 const selectDomain = (state: RootState) => state?.catalogStore || initialState;
 
+export const selectCatalogHandling = createSelector(
+  [selectDomain],
+  (state) => state.handling,
+);
+
 export const selectCharacters = createSelector(
   [selectDomain],
   (state) => state.data.characters,

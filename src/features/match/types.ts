@@ -13,7 +13,8 @@ export type Match = {
   players: { name: string; id: string }[];
   status: 'ban-pick' | 'playing' | 'finished';
   date?: number;
-  winner?: string;
+  tournamentId?: string;
+  winner?: number;
   games?: {
     player: number;
     characters: string[];

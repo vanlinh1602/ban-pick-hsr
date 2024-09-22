@@ -24,10 +24,25 @@ const slice = createSlice({
         };
       }
     },
+    fetchMatches(state, action: PayloadAction<Match[]>) {
+      state.handling = false;
+      const matches = action.payload;
+      matches.forEach((match) => {
+        if (Object.keys(match).length) {
+          state.data = {
+            ...state.data,
+            [match.id]: match,
+          };
+        }
+      });
+    },
     updateHanding(state, action: PayloadAction<boolean>) {
       state.handling = action.payload;
     },
     getMatch(state, _action: PayloadAction<string>) {
+      state.handling = true;
+    },
+    getMatches(state, _action: PayloadAction<{ tournament: string }>) {
       state.handling = true;
     },
     createMatch(

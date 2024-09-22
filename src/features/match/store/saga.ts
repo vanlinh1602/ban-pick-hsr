@@ -37,6 +37,35 @@ function* getMatch(action: PayloadAction<string>) {
   }
 }
 
+function* getMatches(action: PayloadAction<{ tournament: string }>) {
+  try {
+    const { tournament } = action.payload;
+
+    const result: WithApiResult<Match[]> = yield backendService.post(
+      '/match/query',
+      { filter: { tournamentId: tournament } },
+    );
+    if (result.kind === 'ok') {
+      const matches = result.data;
+      yield put(matchActions.fetchMatches(matches));
+    } else {
+      yield put(matchActions.updateHanding(false));
+      toast({
+        variant: 'destructive',
+        title: 'Failed',
+        description: formatError(result),
+      });
+    }
+  } catch (err) {
+    matchActions.updateHanding(false);
+    toast({
+      variant: 'destructive',
+      title: 'Failed',
+      description: formatError(err),
+    });
+  }
+}
+
 function* createMatch(
   action: PayloadAction<{
     mathInfo: Partial<Match>;
@@ -101,6 +130,7 @@ function* updateMatch(action: PayloadAction<Match>) {
 export default function* saga() {
   yield all([
     takeLatest(matchActions.getMatch.type, getMatch),
+    takeLatest(matchActions.getMatches.type, getMatches),
     takeLatest(matchActions.createMatch.type, createMatch),
     takeLatest(matchActions.updateMatch.type, updateMatch),
   ]);
