@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { VideoPlayer } from '@/components';
-import characters from '@/data/character.json';
+import { selectCharacters } from '@/features/catalogs/store/selectors';
+import type { Character } from '@/features/catalogs/types';
 
 import { selectMatchData } from '../../store/selectors';
-import { Character } from '../../types';
 
 type Props = {
   id: string;
@@ -13,6 +13,7 @@ type Props = {
 
 const MatchLive = ({ id }: Props) => {
   const matchDetail = useSelector((state: any) => selectMatchData(state, id));
+  const characters = useSelector(selectCharacters);
 
   const { playerData, score } = useMemo(() => {
     const mathInfo: {

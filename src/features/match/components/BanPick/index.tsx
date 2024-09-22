@@ -14,14 +14,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import characters from '@/data/character.json';
-import combatTypes from '@/data/combatType.json';
-import paths from '@/data/path.json';
+import {
+  selectCharacters,
+  selectCombatTypes,
+  selectPaths,
+} from '@/features/catalogs/store/selectors';
+import type { Character } from '@/features/catalogs/types';
 import { socket } from '@/services/socket';
 
 import { useMatchSlice } from '../../store';
 import { selectMatchData } from '../../store/selectors';
-import { Character, Match } from '../../types';
+import { Match } from '../../types';
 
 type Filter = {
   path?: string;
@@ -34,12 +37,17 @@ type Props = {
 };
 
 const BanPick = ({ id }: Props) => {
-  const dispatch = useDispatch();
   const location = useLocation();
   const { state } = location;
 
+  const dispatch = useDispatch();
   const { actions } = useMatchSlice();
+
   const matchData = useSelector((state: any) => selectMatchData(state, id));
+  const characters = useSelector(selectCharacters);
+  const paths = useSelector(selectPaths);
+  const combatTypes = useSelector(selectCombatTypes);
+
   const { matchSetup } = matchData || {};
   const [player, setPlayer] = useState<number>();
   const [filter, setFilter] = useState<Filter>();

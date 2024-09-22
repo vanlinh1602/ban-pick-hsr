@@ -1,7 +1,8 @@
 import './App.css';
 
 import { ScrollArea } from '@radix-ui/react-scroll-area';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -10,6 +11,7 @@ import {
   RouterProvider,
 } from 'react-router-dom';
 
+import { useCatalogSlice } from './features/catalogs/store';
 import { MenuBar } from './features/layout/components';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -31,6 +33,13 @@ const AppLayout = () => (
 );
 
 function App() {
+  const dispatch = useDispatch();
+  const { actions } = useCatalogSlice();
+
+  useEffect(() => {
+    dispatch(actions.getCatalogs());
+  }, []);
+
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route element={<AppLayout />}>
