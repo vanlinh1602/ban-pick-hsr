@@ -1,2 +1,4 @@
 export { default as BracketDisplay } from './BracketDisplay';
-export { default as BracketManager } from './BracketManager';
+export { default as PlayerEditor } from './PlayerEditor';
+export { default as PLayersOrder } from './PLayersOrder';
+export { default as ViewPlayers } from './ViewPlayers';

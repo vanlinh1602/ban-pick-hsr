@@ -1,3 +1,5 @@
+import { Player } from '../tournament/type';
+
 export type MatchSetUpInfo = {
   banPickStatus: {
     player: number;
@@ -10,8 +12,8 @@ export type MatchSetUpInfo = {
 
 export type Match = {
   id: string;
-  players: { name: string; id: string }[];
-  status: 'ban-pick' | 'playing' | 'finished';
+  players: Player[];
+  status: 'set-up' | 'ban-pick' | 'playing' | 'finished';
   date?: number;
   tournamentId?: string;
   winner?: number;

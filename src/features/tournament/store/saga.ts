@@ -1,12 +1,14 @@
 import { PayloadAction } from '@reduxjs/toolkit';
-import { all, put, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeLatest } from 'redux-saga/effects';
 
 import { toast } from '@/components/hooks/use-toast';
+import { Match } from '@/features/match/types';
 import { backendService } from '@/services';
 import formatError from '@/utils/formatError';
 
 import { Tournament } from '../type';
 import { actions as tournamentActions } from './reducer';
+import { selectTournamentData } from './selectors';
 
 function* getTournaments() {
   try {
@@ -33,7 +35,49 @@ function* getTournaments() {
   }
 }
 
-function* updateTournament(action: PayloadAction<Tournament>) {
+function* getTournament(action: PayloadAction<string>) {
+  try {
+    const id = action.payload;
+    const result: WithApiResult<CustomObject<Tournament>> =
+      yield backendService.post('/tournament/get', {
+        id,
+      });
+    if (result.kind === 'ok') {
+      const tournament = result.data;
+      if (tournament[id]) {
+        yield put(
+          tournamentActions.modifyTournament({
+            path: [id],
+            data: tournament[id],
+          }),
+        );
+      } else {
+        yield put(tournamentActions.updateHanding(false));
+        toast({
+          variant: 'destructive',
+          title: 'Failed',
+          description: 'Tournament not found',
+        });
+      }
+    } else {
+      yield put(tournamentActions.updateHanding(false));
+      toast({
+        variant: 'destructive',
+        title: 'Failed',
+        description: formatError(result),
+      });
+    }
+  } catch (err) {
+    tournamentActions.updateHanding(false);
+    toast({
+      variant: 'destructive',
+      title: 'Failed',
+      description: formatError(err),
+    });
+  }
+}
+
+function* updateTournament(action: PayloadAction<Partial<Tournament>>) {
   try {
     const result: WithApiResult<Tournament> = yield backendService.post(
       '/tournament/update',
@@ -49,6 +93,10 @@ function* updateTournament(action: PayloadAction<Tournament>) {
           data: tournament,
         }),
       );
+      toast({
+        title: 'Success',
+        description: 'Tournament updated',
+      });
     } else {
       yield put(tournamentActions.updateHanding(false));
       toast({
@@ -83,6 +131,56 @@ function* createTournament(action: PayloadAction<Partial<Tournament>>) {
           data: tournament,
         }),
       );
+      toast({
+        title: 'Success',
+        description: 'Tournament created',
+      });
+    } else {
+      yield put(tournamentActions.updateHanding(false));
+      toast({
+        variant: 'destructive',
+        title: 'Failed',
+        description: formatError(result),
+      });
+    }
+  } catch (err) {
+    tournamentActions.updateHanding(false);
+    toast({
+      variant: 'destructive',
+      title: 'Failed',
+      description: formatError(err),
+    });
+  }
+}
+
+function* saveBracket(
+  action: PayloadAction<{ id: string; rounds: Match[][] }>,
+) {
+  try {
+    const { id, rounds } = action.payload;
+    const tournament: Tournament = yield select((state) =>
+      selectTournamentData(state, id),
+    );
+    const result: WithApiResult<Tournament> = yield backendService.post(
+      '/tournament/saveBracket',
+      {
+        id,
+        rounds,
+        players: tournament.players,
+      },
+    );
+    if (result.kind === 'ok') {
+      const tournament = result.data;
+      yield put(
+        tournamentActions.modifyTournament({
+          path: [tournament.id],
+          data: tournament,
+        }),
+      );
+      toast({
+        title: 'Success',
+        description: 'Bracket saved',
+      });
     } else {
       yield put(tournamentActions.updateHanding(false));
       toast({
@@ -106,5 +204,7 @@ export default function* saga() {
     takeLatest(tournamentActions.getTournaments.type, getTournaments),
     takeLatest(tournamentActions.updateTournament.type, updateTournament),
     takeLatest(tournamentActions.createTournament.type, createTournament),
+    takeLatest(tournamentActions.getTournament.type, getTournament),
+    takeLatest(tournamentActions.saveBracket.type, saveBracket),
   ]);
 }

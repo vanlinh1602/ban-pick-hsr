@@ -19,6 +19,7 @@ const Configs = lazy(() => import('./pages/Configs'));
 const Match = lazy(() => import('./pages/Match'));
 const MatchDetail = lazy(() => import('./pages/MatchDetail'));
 const Tournament = lazy(() => import('./pages/Tournament'));
+const TournamentEdit = lazy(() => import('./pages/TournamentEdit'));
 
 const AppLayout = () => (
   <Suspense>
@@ -52,6 +53,7 @@ function App() {
         </Route>
         <Route path="/tournament" element={<Outlet />}>
           <Route path=":id" element={<Tournament />} />
+          <Route path=":id/edit" element={<TournamentEdit />} />
         </Route>
         <Route path="/configs" element={<Configs />} />
         <Route path="*" element={<div>Chưa làm hehe</div>} />

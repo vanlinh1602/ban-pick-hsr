@@ -1,3 +1,9 @@
+export type Player = {
+  id: string;
+  name: string;
+  email: string;
+};
+
 export type Tournament = {
   id: string;
   name: string;
@@ -7,7 +13,7 @@ export type Tournament = {
   };
   organizer: string;
   description: string;
-  players: { name: string; email: string }[];
+  players: Player[];
   rounds?: {
     round: string;
     matches: string[];

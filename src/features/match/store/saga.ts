@@ -81,6 +81,10 @@ function* createMatch(
     );
     if (result.kind === 'ok') {
       onSuccess(result.data.id);
+      toast({
+        title: 'Success',
+        description: 'Match created',
+      });
     } else {
       yield put(matchActions.updateHanding(false));
       toast({
@@ -109,6 +113,10 @@ function* updateMatch(action: PayloadAction<Match>) {
     );
     if (result.kind === 'ok') {
       yield put(matchActions.fetchMatch(result.data));
+      toast({
+        title: 'Success',
+        description: 'Match updated',
+      });
     } else {
       yield put(matchActions.updateHanding(false));
       toast({
