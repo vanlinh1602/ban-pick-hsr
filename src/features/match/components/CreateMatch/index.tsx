@@ -72,10 +72,12 @@ const CreateMatch = () => {
     const matchInfo: Partial<MatchType> = {
       players: [
         {
+          email: '',
           name: values.player1,
           id: generateID(),
         },
         {
+          email: '',
           name: values.player2,
           id: generateID(),
         },
