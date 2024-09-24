@@ -108,7 +108,7 @@ const TournamentDetails = () => {
               { points: 0, matchesWon: 0 },
             ] as { points: number; matchesWon: number }[],
           );
-          matchPlayers.forEach((player, index) => {
+          matchPlayers?.forEach((player, index) => {
             if (!initialData.players[player.id]) {
               initialData.players[player.id] = {
                 name: player.name,
@@ -293,63 +293,6 @@ const TournamentDetails = () => {
             className="bg-white rounded-lg shadow-lg p-6"
             aria-labelledby="matches-title"
           >
-            {/* <h2
-              id="matches-title"
-              className="text-2xl font-semibold mb-4 flex items-center"
-            >
-              <FaClock className="mr-2 text-blue-500" /> Upcoming Matches
-            </h2>
-            <ul className="space-y-4 max-h-80 overflow-y-scroll no-scrollbar">
-              {completedMatches.map((match) => (
-                <li
-                  key={match.id}
-                  className="border rounded-lg overflow-hidden"
-                >
-                  <div
-                    className="flex justify-between items-center p-4 cursor-pointer bg-gray-100 hover:bg-gray-200 transition-colors"
-                    onClick={() => toggleMatchExpansion(match.id)}
-                    aria-expanded={expandedMatch === match.id}
-                    aria-controls={`match-details-${match.id}`}
-                  >
-                    <div>
-                      <span className="font-medium">
-                        {match.players[0]?.name}
-                      </span>{' '}
-                      vs{' '}
-                      <span className="font-medium">
-                        {match.players[1]?.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-sm text-gray-600 mr-2">
-                        {format(match.date || Date.now(), 'd/L/y')}
-                      </span>
-                      {expandedMatch === match.id ? (
-                        <FaChevronUp className="text-gray-600" />
-                      ) : (
-                        <FaChevronDown className="text-gray-600" />
-                      )}
-                    </div>
-                  </div>
-                  {expandedMatch === match.id && (
-                    <div
-                      id={`match-details-${match.id}`}
-                      className="p-4 bg-white"
-                    >
-                      <p className="text-sm text-gray-600">Round: 1</p>
-                      <p className="text-sm text-gray-600 mt-2">
-                        Additional match details and live updates can be
-                        displayed here.
-                      </p>
-                    </div>
-                  )}
-                </li>
-              ))}
-              {!upcomingMatches.length ? (
-                <p className="text-gray-600">No upcoming matches</p>
-              ) : null}
-            </ul> */}
-
             <Tabs defaultValue="account" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="upcoming">Upcoming Match</TabsTrigger>
