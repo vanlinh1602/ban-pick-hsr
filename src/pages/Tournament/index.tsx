@@ -18,11 +18,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { EditTournament } from '@/features/home/components';
 import { useMatchSlice } from '@/features/match/store';
 import { selectMatchOfTournament } from '@/features/match/store/selectors';
 import { Match } from '@/features/match/types';
-import { BracketDisplay, ViewPlayers } from '@/features/tournament/components';
+import {
+  BracketDisplay,
+  EditTournament,
+  ViewPlayers,
+} from '@/features/tournament/components';
 import { useTournamentSlice } from '@/features/tournament/store';
 import { selectTournamentData } from '@/features/tournament/store/selectors';
 type TournamentData = {
@@ -365,11 +368,11 @@ const TournamentDetails = () => {
                       >
                         <div>
                           <span className="font-medium">
-                            {match.players[0]?.name}
+                            {match.players?.[0]?.name}
                           </span>{' '}
                           vs{' '}
                           <span className="font-medium">
-                            {match.players[1]?.name}
+                            {match.players?.[1]?.name}
                           </span>
                         </div>
                         <div className="flex items-center">

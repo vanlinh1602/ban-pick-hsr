@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { Waiting } from '@/components';
-import { EditTournament } from '@/features/home/components';
+import { EditTournament } from '@/features/tournament/components';
 import { useTournamentSlice } from '@/features/tournament/store';
 import {
   selectTournamentHandling,
