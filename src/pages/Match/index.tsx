@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CreateMatch, JoinMatch } from '@/features/match/components';
+import { JoinMatch, MatchEditor } from '@/features/match/components';
 
 const Match = () => {
   return (
@@ -10,7 +10,7 @@ const Match = () => {
           <TabsTrigger value="join">Join</TabsTrigger>
         </TabsList>
         <TabsContent value="create">
-          <CreateMatch />
+          <MatchEditor />
         </TabsContent>
         <TabsContent value="join">
           <JoinMatch />

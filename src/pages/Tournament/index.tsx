@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FaAudioDescription,
   FaCalendarAlt,
@@ -28,6 +29,7 @@ import {
 } from '@/features/tournament/components';
 import { useTournamentSlice } from '@/features/tournament/store';
 import { selectTournamentData } from '@/features/tournament/store/selectors';
+import { translations } from '@/locales/translations';
 type TournamentData = {
   players: {
     name: string;
@@ -46,6 +48,9 @@ type TournamentData = {
 const TournamentDetails = () => {
   const navigator = useNavigate();
   const { id } = useParams();
+
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
   const { actions: matchActions } = useMatchSlice();
   const { actions: tournamentActions } = useTournamentSlice();
@@ -195,7 +200,7 @@ const TournamentDetails = () => {
             className="text-lg font-semibold mb-4 flex items-center"
           >
             <FaAudioDescription className="mr-2 text-blue-500" />
-            Decriptions:{' '}
+            {t(translations.decriptions)}:{' '}
             <span className="ml-2 font-normal">{tournament?.description}</span>
           </h2>
           <h2
@@ -203,7 +208,7 @@ const TournamentDetails = () => {
             className="text-lg font-semibold mb-4 flex items-center"
           >
             <FaCalendarAlt className="mr-2 text-blue-500" />
-            Ngày:{' '}
+            {t(translations.date)}:{' '}
             <span className="ml-2 font-normal">
               {format(tournament?.date?.from || Date.now(), 'd/L/y')}
               {tournament?.date?.to
@@ -216,7 +221,7 @@ const TournamentDetails = () => {
             className="text-lg font-semibold mb-4 flex items-center"
           >
             <GoOrganization className="mr-2 text-blue-500" />
-            Organizer:{' '}
+            {t(translations.organizer)}:{' '}
             <span className="ml-2 font-normal">{tournament?.organizer}</span>
           </h2>
           <h2
@@ -224,7 +229,7 @@ const TournamentDetails = () => {
             className="text-lg font-semibold flex items-center"
           >
             <VscOrganization className="mr-2 text-blue-500" />
-            Number of participants:{' '}
+            {t(translations.numberOfParticipants)}:{' '}
             <span className="ml-2 font-normal">
               {tournament?.players?.length || 0}
             </span>
@@ -240,13 +245,14 @@ const TournamentDetails = () => {
                 id="rankings-title"
                 className="text-2xl font-semibold mb-4 flex items-center"
               >
-                <FaTrophy className="mr-2 text-yellow-500" /> Player Rankings
+                <FaTrophy className="mr-2 text-yellow-500" />{' '}
+                {t(translations.playerRankings)}
               </h2>
               <Button
                 className="mb-4 bg-blue-500 hover:bg-blue-600 text-white"
                 onClick={() => setShowPlayer(true)}
               >
-                View Player
+                {t(translations.viewPlayers)}
               </Button>
             </div>
             <div className="mb-4 flex justify-between items-center">
@@ -265,9 +271,9 @@ const TournamentDetails = () => {
                 onChange={(e) => setSortCriteria(e.target.value)}
                 aria-label="Sort criteria"
               >
-                <option value="ranking">Ranking</option>
-                <option value="points">Points</option>
-                <option value="matchesWon">Matches Won</option>
+                <option value="ranking">{t(translations.ranking)}</option>
+                <option value="points">{t(translations.points)}</option>
+                <option value="matchesWon">{t(translations.matchWon)}</option>
               </select>
             </div>
             <ul className="space-y-2 max-h-80 overflow-y-scroll no-scrollbar">
@@ -279,13 +285,13 @@ const TournamentDetails = () => {
                   <span className="font-medium">{player.name}</span>
                   <div className="flex space-x-4">
                     <span className="text-sm text-gray-600">
-                      Rank: {index + 1}
+                      {t(translations.ranking)}: {index + 1}
                     </span>
                     <span className="text-sm text-gray-600">
-                      Points: {player.points}
+                      {t(translations.points)}: {player.points}
                     </span>
                     <span className="text-sm text-gray-600">
-                      Wins: {player.matchesWon}
+                      {t(translations.matchWon)}: {player.matchesWon}
                     </span>
                   </div>
                 </li>
@@ -296,10 +302,14 @@ const TournamentDetails = () => {
             className="bg-white rounded-lg shadow-lg p-6"
             aria-labelledby="matches-title"
           >
-            <Tabs defaultValue="account" className="w-full">
+            <Tabs defaultValue="upcoming" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="upcoming">Upcoming Match</TabsTrigger>
-                <TabsTrigger value="password">Completed Match</TabsTrigger>
+                <TabsTrigger value="upcoming">
+                  {t(translations.upcomingMatch)}
+                </TabsTrigger>
+                <TabsTrigger value="completed">
+                  {t(translations.completedMatch)}
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="upcoming">
                 <ul className="space-y-4 max-h-96 overflow-y-scroll no-scrollbar">
@@ -337,23 +347,44 @@ const TournamentDetails = () => {
                       {expandedMatch === match.id && (
                         <div
                           id={`match-details-${match.id}`}
-                          className="p-4 bg-white"
+                          className="p-4 bg-white flex justify-between"
                         >
-                          <p className="text-sm text-gray-600">Round: 1</p>
-                          <p className="text-sm text-gray-600 mt-2">
-                            Additional match details and live updates can be
-                            displayed here.
-                          </p>
+                          <div>
+                            <p className="text-sm text-gray-600 text-start">
+                              <b className="mr-1">{t(translations.status)}: </b>
+                              {t(translations.matchStatus[match.status])}
+                            </p>
+                            <p className="text-sm text-gray-600 mt-1 text-start">
+                              <b className="mr-1">{t(translations.winner)}: </b>
+                              {match.winner
+                                ? match.players[match.winner].name
+                                : '----'}
+                            </p>
+                            <p className="text-sm text-gray-600 mt-1 text-start">
+                              <b className="mr-1">
+                                {t(translations.totalRound)}:
+                              </b>
+                              {match.games?.length || 0}
+                            </p>
+                          </div>
+                          <Button
+                            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white"
+                            onClick={() => navigator(`/match/${match.id}`)}
+                          >
+                            {t(translations.actions.view)}
+                          </Button>
                         </div>
                       )}
                     </li>
                   ))}
                   {!upcomingMatches.length ? (
-                    <p className="text-gray-600 mt-4">No upcoming matches</p>
+                    <p className="text-gray-600 mt-4">
+                      {t(translations.notify.noUpcomingMatches)}
+                    </p>
                   ) : null}
                 </ul>
               </TabsContent>
-              <TabsContent value="password">
+              <TabsContent value="completed">
                 <ul className="space-y-4 max-h-96 overflow-y-scroll no-scrollbar">
                   {completedMatches.map((match) => (
                     <li
@@ -389,19 +420,40 @@ const TournamentDetails = () => {
                       {expandedMatch === match.id && (
                         <div
                           id={`match-details-${match.id}`}
-                          className="p-4 bg-white"
+                          className="p-4 bg-white flex justify-between"
                         >
-                          <p className="text-sm text-gray-600">Round: 1</p>
-                          <p className="text-sm text-gray-600 mt-2">
-                            Additional match details and live updates can be
-                            displayed here.
-                          </p>
+                          <div>
+                            <p className="text-sm text-gray-600 text-start">
+                              <b className="mr-1">{t(translations.status)}: </b>
+                              {t(translations.matchStatus[match.status])}
+                            </p>
+                            <p className="text-sm text-gray-600 mt-1 text-start">
+                              <b className="mr-1">{t(translations.winner)}: </b>
+                              {match.winner
+                                ? match.players[match.winner].name
+                                : '----'}
+                            </p>
+                            <p className="text-sm text-gray-600 mt-1 text-start">
+                              <b className="mr-1">
+                                {t(translations.totalRound)}:
+                              </b>
+                              {match.games?.length || 0}
+                            </p>
+                          </div>
+                          <Button
+                            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white"
+                            onClick={() => navigator(`/match/${match.id}`)}
+                          >
+                            {t(translations.actions.view)}
+                          </Button>
                         </div>
                       )}
                     </li>
                   ))}
                   {!completedMatches.length ? (
-                    <p className="text-gray-600 mt-4">No completed matches</p>
+                    <p className="text-gray-600 mt-4">
+                      {t(translations.notify.noCompletedMatches)}
+                    </p>
                   ) : null}
                 </ul>
               </TabsContent>
@@ -417,7 +469,8 @@ const TournamentDetails = () => {
               id="structure-title"
               className="text-2xl font-semibold mb-4 flex items-center"
             >
-              <FaUsers className="mr-2 text-green-500" /> Tournament Structure
+              <FaUsers className="mr-2 text-green-500" />{' '}
+              {t(translations.tournamentStructure)}
             </h2>
             <FaRegEdit
               className="text-xl text-blue-400 mb-4"

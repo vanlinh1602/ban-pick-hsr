@@ -2,15 +2,39 @@
   "appName": "HSR Tournament",
   "pages": {
     "home": "Trang chủ",
-    "users": "Người dùng",
-    "settings": "Cài đặt",
     "config": "Cấu hình",
     "match": "Trận đấu"
   },
 
   "actions": {
-    "update": "Cập nhật"
+    "update": "Cập nhật",
+    "view": "Xem"
   },
-  "gameInAccount": "Trò chơi trong tài khoản",
-  "battleChronicle": "Chiến tích"
+
+  "notify": {
+    "noUpcomingMatches": "Không có trận đấu nào sắp tới",
+    "noCompletedMatches": "Không có trận đấu nào đã kết thúc"
+  },
+
+  "matchStatus": {
+    "set-up": "Chuẩn bị",
+    "ban-pick": "Cấm chọn",
+    "playing": "Đang diễn ra",
+    "finished": "Kết thúc"
+  },
+  "decriptions": "Mô tả",
+  "organizer": "Người tổ chức",
+  "date": "Ngày",
+  "numberOfParticipants": "Số người tham gia",
+  "playerRankings": "Bảng xếp hạng",
+  "viewPlayers": "Xem người chơi",
+  "ranking": "Xếp hạng",
+  "points": "Điểm",
+  "matchWon": "Trận thắng",
+  "upcomingMatch": "Trận đấu sắp tới",
+  "completedMatch": "Trận đấu đã kết thúc",
+  "status": "Trạng thái",
+  "winner": "Người chiến thắng",
+  "totalRound": "Tổng số vòng",
+  "tournamentStructure": "Cấu trúc giải đấu"
 }

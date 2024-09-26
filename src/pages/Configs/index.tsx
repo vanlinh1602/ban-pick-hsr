@@ -15,94 +15,7 @@ type Character = {
 const CharacterPointsAdjuster = () => {
   const allCharacters = useSelector(selectCharacters);
 
-  const [characters, setCharacters] = useState<Character[]>([
-    {
-      id: '1',
-      name: 'Warrior',
-      points: 100,
-      avatar:
-        'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-    },
-    {
-      id: '2',
-      name: 'Mage',
-      points: 80,
-      avatar:
-        'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-    },
-    {
-      id: '3',
-      name: 'Rogue',
-      points: 90,
-      avatar:
-        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-    },
-    {
-      id: '4',
-      name: 'Warrior',
-      points: 100,
-      avatar:
-        'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-    },
-    {
-      id: '5',
-      name: 'Mage',
-      points: 80,
-      avatar:
-        'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-    },
-    {
-      id: '6',
-      name: 'Rogue',
-      points: 90,
-      avatar:
-        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-    },
-
-    {
-      id: '7',
-      name: 'Warrior',
-      points: 100,
-      avatar:
-        'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-    },
-    {
-      id: '8',
-      name: 'Mage',
-      points: 80,
-      avatar:
-        'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-    },
-    {
-      id: '9',
-      name: 'Rogue',
-      points: 90,
-      avatar:
-        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-    },
-
-    {
-      id: '10',
-      name: 'Warrior',
-      points: 100,
-      avatar:
-        'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-    },
-    {
-      id: '11',
-      name: 'Mage',
-      points: 80,
-      avatar:
-        'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-    },
-    {
-      id: '12',
-      name: 'Rogue',
-      points: 90,
-      avatar:
-        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-    },
-  ]);
+  const [characters, setCharacters] = useState<Character[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
   const [sortCriteria, setSortCriteria] = useState('name');
@@ -110,11 +23,11 @@ const CharacterPointsAdjuster = () => {
 
   useEffect(() => {
     setCharacters(
-      allCharacters.map((char) => ({
+      Object.values(allCharacters).map((char) => ({
         points: 0,
-        id: char.entry_page_id,
+        id: char.id,
         name: char.name,
-        avatar: char.icon_url,
+        avatar: char.icon,
       })),
     );
   }, [allCharacters]);

@@ -30,9 +30,7 @@ const MatchLive = ({ id }: Props) => {
       score: { player1: 0, player2: 0 },
     };
     matchDetail?.matchSetup?.banPickStatus.forEach((status) => {
-      const character = characters.find((char) => {
-        return char.entry_page_id === status.character;
-      });
+      const character = characters[status.character!];
       if (status.type === 'ban') {
         mathInfo.playerData[`player${status.player}`].bans.push(character!);
       } else {
@@ -91,8 +89,8 @@ const MatchLive = ({ id }: Props) => {
                 {playerData.player1.bans.map((char) => {
                   return (
                     <img
-                      key={char.entry_page_id}
-                      src={char.icon_url}
+                      key={char.id}
+                      src={char.icon}
                       alt={char.name}
                       className="w-8 h-8 rounded-full"
                     />
@@ -106,8 +104,8 @@ const MatchLive = ({ id }: Props) => {
                 {playerData.player2.bans.map((char) => {
                   return (
                     <img
-                      key={char.entry_page_id}
-                      src={char.icon_url}
+                      key={char.id}
+                      src={char.icon}
                       alt={char.name}
                       className="w-8 h-8 rounded-full"
                     />
@@ -128,8 +126,8 @@ const MatchLive = ({ id }: Props) => {
                 {playerData.player1.picks.map((char) => {
                   return (
                     <img
-                      key={char.entry_page_id}
-                      src={char.icon_url}
+                      key={char.id}
+                      src={char.icon}
                       alt={char.name}
                       className="w-8 h-8 rounded-full"
                     />
@@ -143,8 +141,8 @@ const MatchLive = ({ id }: Props) => {
                 {playerData.player2.picks.map((char) => {
                   return (
                     <img
-                      key={char.entry_page_id}
-                      src={char.icon_url}
+                      key={char.id}
+                      src={char.icon}
                       alt={char.name}
                       className="w-8 h-8 rounded-full"
                     />
@@ -175,13 +173,11 @@ const MatchLive = ({ id }: Props) => {
               <div className="flex justify-around items-center">
                 <div className="grid grid-cols-4 gap-5">
                   {game.characters.map((char, index) => {
-                    const character = characters.find(
-                      (item) => item.entry_page_id === char,
-                    );
+                    const character = characters[char];
                     return (
                       <img
                         key={index}
-                        src={character?.icon_url}
+                        src={character?.icon}
                         alt={character?.name}
                         className="w-10 h-10 rounded"
                       />

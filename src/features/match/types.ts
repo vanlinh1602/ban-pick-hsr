@@ -22,10 +22,22 @@ export type Match = {
     characters: string[];
     points: number;
   }[];
+  host?: {
+    id: string;
+    email?: string;
+  };
   matchSetup?: MatchSetUpInfo;
 };
 
 export type MatchState = {
   handling: boolean;
   data: CustomObject<Match>;
+  liveActions?: {
+    banPick?: {
+      type: 'ban' | 'pick';
+      player: number;
+      character: string;
+      key: string;
+    };
+  };
 };

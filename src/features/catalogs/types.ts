@@ -1,37 +1,52 @@
-export type Character = {
-  entry_page_id: string;
+export interface Character {
+  id: string;
   name: string;
-  icon_url: string;
-  display_field: DisplayField;
-  filter_values: FilterValues;
-  desc: string;
-};
+  icon: string;
+  background: string;
+  path: Value[];
+  rarity: Value[];
+  combatType: Value[];
+  factions: Value[];
+}
 
-type DisplayField = {
-  attr_level_1?: string;
-  attr_level_80?: string;
-};
+export interface LightCone {
+  id: string;
+  name: string;
+  icon: string;
+  background: string;
+  rarity: Value[];
+  skillType: Value[];
+  source: Value[];
+  paths: Value[];
+}
 
-type FilterValues = {
-  character_rarity: CharacterCombatTypeClass;
-  character_factions?: CharacterCombatTypeClass;
-  character_combat_type: CharacterCombatTypeClass;
-  character_paths: CharacterCombatTypeClass;
-};
+interface FilterField {
+  key: string;
+  text: string;
+  values: Value[];
+}
 
-type CharacterCombatTypeClass = {
-  values: string[];
-  value_types: ValueType[];
-  key: null;
-};
-
-type ValueType = {
+interface Value {
   id: string;
   value: string;
   mi18n_key: string;
   icon: string;
   enum_string: string;
-};
+}
+
+export interface FilterLightCone {
+  equipment_paths: FilterField;
+  equipment_rarity: FilterField;
+  equipment_skill_type: FilterField;
+  equipment_source: FilterField;
+}
+
+export interface FilterCharacter {
+  character_combat_type: FilterField;
+  character_paths: FilterField;
+  character_rarity: FilterField;
+  character_factions: FilterField;
+}
 
 export type Paths = {
   id: string;
@@ -52,8 +67,9 @@ export type CombatType = {
 export type CatalogState = {
   handling: boolean;
   data: {
-    characters: Character[];
-    combatTypes: CombatType[];
-    paths: Paths[];
+    characters: CustomObject<Character>;
+    lightCones: CustomObject<LightCone>;
+    filterCharacter: FilterCharacter;
+    filterLightCone: FilterLightCone;
   };
 };

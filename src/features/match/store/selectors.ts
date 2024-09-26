@@ -30,3 +30,8 @@ export const selectMatchHandling = createSelector(
   selectDomain,
   (state) => state.handling,
 );
+
+export const selectLiveActions = createSelector(
+  selectDomain,
+  (state) => state.liveActions,
+);

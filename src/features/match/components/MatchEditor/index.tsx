@@ -9,6 +9,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { FaBan, FaCheck } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
@@ -32,8 +33,16 @@ import {
 import { useMatchSlice } from '@/features/match/store';
 import { Match as MatchType } from '@/features/match/types';
 import { determineTurn, generateID } from '@/lib/utils';
+import { socket } from '@/services/socket';
 
-const CreateMatch = () => {
+import { selectMatchData } from '../../store/selectors';
+
+type Props = {
+  id?: string;
+  type?: string;
+};
+
+const MatchEditor = ({ id }: Props) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { actions } = useMatchSlice();
@@ -42,10 +51,20 @@ const CreateMatch = () => {
   const [firstPick, setFirstPick] = useState(1);
   const [order, setOrder] = useState<{ player: number; type: string }[]>([]);
 
+  const matchData = useSelector((state: any) =>
+    selectMatchData(state, id || ''),
+  );
+
   useEffect(() => {
     const newOrder = determineTurn(numBans, numPicks, firstPick);
     setOrder(newOrder);
   }, [numBans, numPicks, firstPick]);
+
+  useEffect(() => {
+    if (matchData?.matchSetup?.banPickStatus) {
+      setOrder(matchData.matchSetup.banPickStatus);
+    }
+  }, [matchData]);
 
   const formSchema = z.object({
     numBans: z.string(),
@@ -59,18 +78,27 @@ const CreateMatch = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      numBans: '2',
-      numPicks: '2',
-      firstPick: '1',
-      goFirst: '1',
-      player1: 'Player 1',
-      player2: 'Player 2',
+      numBans:
+        matchData?.matchSetup?.banPickStatus
+          ?.filter((item: any) => item.type === 'ban')
+          .length.toString() || '2',
+      numPicks:
+        matchData?.matchSetup?.banPickStatus
+          ?.filter((item: any) => item.type === 'pick')
+          .length.toString() || '2',
+      firstPick: matchData?.matchSetup?.firstPick.toString() || '1',
+      goFirst: matchData?.matchSetup?.goFirst.toString() || '1',
+      player1: matchData?.players?.[0].name || 'Player 1',
+      player2: matchData?.players?.[1].name || 'Player 2',
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (
+    values: z.infer<typeof formSchema>,
+    action: 'create' | 'update' | 'start',
+  ) => {
     const matchInfo: Partial<MatchType> = {
-      players: [
+      players: matchData.players ?? [
         {
           email: '',
           name: values.player1,
@@ -82,6 +110,7 @@ const CreateMatch = () => {
           id: generateID(),
         },
       ],
+      status: 'set-up',
       matchSetup: {
         firstPick: Number(values.firstPick),
         goFirst: Number(values.goFirst),
@@ -91,25 +120,52 @@ const CreateMatch = () => {
         })),
       },
     };
-    dispatch(
-      actions.createMatch({
-        mathInfo: matchInfo,
-        onSuccess: (id: string) => {
-          navigate(`/match/${id}`);
-        },
-      }),
-    );
+    if (id) {
+      if (action === 'update') {
+        dispatch(actions.updateMatch({ id, ...matchInfo }));
+      }
+      if (action === 'start') {
+        dispatch(
+          actions.modifyMatch({
+            id,
+            patch: [],
+            data: {
+              id,
+              ...matchInfo,
+              status: 'ban-pick',
+            },
+          }),
+        );
+        socket.emit('syncMatch', {
+          room: id,
+          match: {
+            id,
+            ...matchInfo,
+            status: 'ban-pick',
+          },
+        });
+      }
+    } else {
+      matchInfo.status = 'ban-pick';
+      dispatch(
+        actions.createMatch({
+          matchInfo: matchInfo,
+          onSuccess: (id) => {
+            navigate(`/match/${id}`);
+          },
+        }),
+      );
+    }
   };
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-
     const items = Array.from(order);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-
     setOrder(items);
   };
+
   return (
     <div
       className="flex flex-col md:grid md:grid-cols-2 gap-4 overflow-y-scroll "
@@ -119,7 +175,7 @@ const CreateMatch = () => {
     >
       <div className="bg-white rounded-lg shadow p-4">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form className="space-y-8">
             <h2 className="text-2xl font-bold">Match Details</h2>
             <div className="grid grid-cols-2 gap-5 text-start">
               <FormField
@@ -261,9 +317,40 @@ const CreateMatch = () => {
                 )}
               />
             </div>
-            <Button type="submit">Create</Button>
           </form>
         </Form>
+        <div className="mt-4">
+          {id ? (
+            <>
+              <Button
+                onClick={() => {
+                  const values = form.getValues();
+                  onSubmit(values, 'update');
+                }}
+              >
+                Update
+              </Button>
+              <Button
+                className="ml-5"
+                onClick={() => {
+                  const values = form.getValues();
+                  onSubmit(values, 'start');
+                }}
+              >
+                Start
+              </Button>
+            </>
+          ) : (
+            <Button
+              onClick={() => {
+                const values = form.getValues();
+                onSubmit(values, 'create');
+              }}
+            >
+              Create
+            </Button>
+          )}
+        </div>
       </div>
       <div className="md:overflow-y-scroll md:no-scrollbar">
         <DragDropContext onDragEnd={onDragEnd}>
@@ -315,4 +402,4 @@ const CreateMatch = () => {
   );
 };
 
-export default CreateMatch;
+export default MatchEditor;

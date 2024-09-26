@@ -15,11 +15,18 @@ export const selectCharacters = createSelector(
   [selectDomain],
   (state) => state.data.characters,
 );
-export const selectCombatTypes = createSelector(
+
+export const selectLightCones = createSelector(
   [selectDomain],
-  (state) => state.data.combatTypes,
+  (state) => state.data.lightCones,
 );
-export const selectPaths = createSelector(
+
+export const selectFilterCharacter = createSelector(
   [selectDomain],
-  (state) => state.data.paths,
+  (state) => state.data.filterCharacter,
+);
+
+export const selectFilterLightCone = createSelector(
+  [selectDomain],
+  (state) => state.data.filterLightCone,
 );

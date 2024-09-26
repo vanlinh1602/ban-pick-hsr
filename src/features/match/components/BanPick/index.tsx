@@ -16,15 +16,13 @@ import {
 } from '@/components/ui/select';
 import {
   selectCharacters,
-  selectCombatTypes,
-  selectPaths,
+  selectFilterCharacter,
 } from '@/features/catalogs/store/selectors';
 import type { Character } from '@/features/catalogs/types';
 import { socket } from '@/services/socket';
 
 import { useMatchSlice } from '../../store';
 import { selectMatchData } from '../../store/selectors';
-import { Match } from '../../types';
 
 type Filter = {
   path?: string;
@@ -45,15 +43,15 @@ const BanPick = ({ id }: Props) => {
 
   const matchData = useSelector((state: any) => selectMatchData(state, id));
   const characters = useSelector(selectCharacters);
-  const paths = useSelector(selectPaths);
-  const combatTypes = useSelector(selectCombatTypes);
+  const filterCharacter = useSelector(selectFilterCharacter);
 
   const { matchSetup } = matchData || {};
   const [player, setPlayer] = useState<number>();
   const [filter, setFilter] = useState<Filter>();
 
-  const [availableCharacters, setAvailableCharacters] =
-    useState<Character[]>(characters);
+  const [availableCharacters, setAvailableCharacters] = useState<Character[]>(
+    Object.values(characters),
+  );
   const [selectCharacter, setSelectCharacter] = useState<Character>();
 
   const { turn, activeTurn, playerData, selectedCharacters } = useMemo(() => {
@@ -63,6 +61,7 @@ const BanPick = ({ id }: Props) => {
         player: number;
         type: 'ban' | 'pick';
         character?: string;
+        key: string;
       };
       playerData: CustomObject<{
         bans: string[];
@@ -71,7 +70,7 @@ const BanPick = ({ id }: Props) => {
       selectedCharacters: string[];
     } = {
       turn: 0,
-      activeTurn: { player: 0, type: 'ban', character: '' },
+      activeTurn: { player: 0, type: 'ban', character: '', key: '' },
       playerData: {
         player1: { bans: [], picks: [] },
         player2: { bans: [], picks: [] },
@@ -81,7 +80,10 @@ const BanPick = ({ id }: Props) => {
     matchData.matchSetup?.banPickStatus.every((status, index) => {
       if (!status.character) {
         data.turn = index;
-        data.activeTurn = status;
+        data.activeTurn = {
+          ...status,
+          key: `${status.type}-${index}`,
+        };
         return false;
       }
       if (status.type === 'ban') {
@@ -97,17 +99,6 @@ const BanPick = ({ id }: Props) => {
   }, [matchData.matchSetup?.banPickStatus]);
 
   useEffect(() => {
-    socket.emit('join_room', { room: id, player: state?.securityId });
-    socket.on('updateMatch', (data: Match) => {
-      dispatch(actions.fetchMatch(data));
-    });
-    setPlayer(player);
-    return () => {
-      socket.emit('leave_room', { room: id, player: state?.securityId });
-    };
-  }, [state?.securityId]);
-
-  useEffect(() => {
     const { securityId } = state || {};
     if (securityId) {
       const findedPlayer = matchData.players?.findIndex((p) => {
@@ -121,25 +112,19 @@ const BanPick = ({ id }: Props) => {
 
   // Filter characters based on selected filters
   useEffect(() => {
-    const filteredCharacters = characters.filter((char) => {
-      if (
-        selectedCharacters.find((selected) => selected === char.entry_page_id)
-      )
+    const filteredCharacters = Object.values(characters).filter((char) => {
+      if (selectedCharacters.find((selected) => selected === char.id))
         return false;
       if (
         filter?.path &&
         filter.path !== 'all' &&
-        !char.filter_values.character_paths.value_types.find(
-          ({ id }) => id === filter.path,
-        )
+        !char.path.some(({ id }) => id === filter.path)
       )
         return false;
       if (
         filter?.combatType &&
         filter.combatType !== 'all' &&
-        !char.filter_values.character_combat_type.value_types.find(
-          ({ id }) => id === filter.combatType,
-        )
+        !char.combatType.some(({ id }) => id === filter.combatType)
       )
         return false;
       if (
@@ -155,7 +140,7 @@ const BanPick = ({ id }: Props) => {
   const handleConfirm = () => {
     if (!selectCharacter) return;
     const banPickStatus = _.cloneDeep(matchSetup?.banPickStatus) || [];
-    _.set(banPickStatus, [turn, 'character'], selectCharacter.entry_page_id);
+    _.set(banPickStatus, [turn, 'character'], selectCharacter.id);
 
     dispatch(
       actions.modifyMatch({
@@ -180,17 +165,29 @@ const BanPick = ({ id }: Props) => {
   const renderCharacterGrid = () => {
     return availableCharacters.map((character) => (
       <button
-        key={character.entry_page_id}
+        key={character.id}
         className={`p-2 rounded-lg transition-all duration-300 ${
-          selectCharacter?.entry_page_id === character.entry_page_id
+          selectCharacter?.id === character.id
             ? 'ring-4 ring-blue-500'
             : 'hover:ring-2 hover:ring-gray-300'
         } flex flex-col items-center w-full h-full`}
         disabled={player !== activeTurn.player}
-        onClick={() => setSelectCharacter(character)}
+        onClick={() => {
+          setSelectCharacter(character);
+          socket.emit('syncUserAction', {
+            room: id,
+            action: 'banPick',
+            data: {
+              character: character.id,
+              player: player,
+              type: activeTurn.type,
+              key: activeTurn.key,
+            },
+          });
+        }}
       >
         <img
-          src={character.icon_url}
+          src={character.icon}
           alt={character.name}
           className="w-20 h-20 object-cover rounded-lg"
         />
@@ -220,13 +217,11 @@ const BanPick = ({ id }: Props) => {
           <h3 className="font-bold">Bans:</h3>
           <div className="flex space-x-2 mt-1">
             {playerMatchData.bans.map((ban) => {
-              const char = characters.find(
-                (character) => character.entry_page_id === ban,
-              );
+              const char = characters[ban];
               return (
                 <img
-                  key={char!.entry_page_id}
-                  src={char!.icon_url}
+                  key={char!.id}
+                  src={char!.icon}
                   alt={char!.name}
                   className="w-10 h-10 rounded-full"
                 />
@@ -238,13 +233,11 @@ const BanPick = ({ id }: Props) => {
           <h3 className="font-bold">Picks:</h3>
           <div className="flex space-x-2 mt-1">
             {playerMatchData.picks.map((pick) => {
-              const char = characters.find(
-                (character) => character.entry_page_id === pick,
-              );
+              const char = characters[pick];
               return (
                 <img
-                  key={char!.entry_page_id}
-                  src={char!.icon_url}
+                  key={char!.id}
+                  src={char!.icon}
                   alt={char!.name}
                   className="w-10 h-10 rounded-full"
                 />
@@ -295,7 +288,7 @@ const BanPick = ({ id }: Props) => {
                           <div>All</div>
                         </div>
                       </SelectItem>
-                      {paths.map((path) => (
+                      {filterCharacter.character_paths.values.map((path) => (
                         <SelectItem key={path.id} value={path.id}>
                           <div className="flex space-x-2 mt-1 ">
                             <img
@@ -329,19 +322,21 @@ const BanPick = ({ id }: Props) => {
                           <div>All</div>
                         </div>
                       </SelectItem>
-                      {combatTypes.map((path) => (
-                        <SelectItem key={path.id} value={path.id}>
-                          <div className="flex space-x-2 mt-1 ">
-                            <img
-                              key={path.id}
-                              src={path.icon}
-                              alt={path.enum_string}
-                              className="w-5 h-5 rounded-full bg-black"
-                            />
-                            <div>{path.value}</div>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {filterCharacter.character_combat_type.values.map(
+                        (path) => (
+                          <SelectItem key={path.id} value={path.id}>
+                            <div className="flex space-x-2 mt-1 ">
+                              <img
+                                key={path.id}
+                                src={path.icon}
+                                alt={path.enum_string}
+                                className="w-5 h-5 rounded-full bg-black"
+                              />
+                              <div>{path.value}</div>
+                            </div>
+                          </SelectItem>
+                        ),
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

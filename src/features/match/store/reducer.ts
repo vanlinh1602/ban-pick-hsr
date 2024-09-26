@@ -48,7 +48,7 @@ const slice = createSlice({
     createMatch(
       state,
       _action: PayloadAction<{
-        mathInfo: Partial<Match>;
+        matchInfo: Partial<Match>;
         onSuccess: (id: string) => void;
       }>,
     ) {
@@ -61,8 +61,17 @@ const slice = createSlice({
       const { id, patch, data } = action.payload;
       _.set(state.data, [id, ...patch], data);
     },
-    updateMatch(state, _action: PayloadAction<Match>) {
+    updateMatch(state, _action: PayloadAction<Partial<Match>>) {
       state.handling = true;
+    },
+    modifyLiveActions(
+      state,
+      action: PayloadAction<{ action: string; data: any }>,
+    ) {
+      state.liveActions = {
+        ...state.liveActions,
+        [action.payload.action]: action.payload.data,
+      };
     },
   },
 });
