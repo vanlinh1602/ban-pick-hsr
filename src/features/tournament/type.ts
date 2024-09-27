@@ -14,10 +14,15 @@ export type Tournament = {
   organizer: string;
   description: string;
   players: Player[];
-  rounds?: {
-    round: string;
-    matches: string[];
-  }[];
+  format: 'single' | 'double';
+  rounds?:
+    | {
+        matches: string[];
+      }[]
+    | {
+        winnersBracket: string[];
+        losersBracket: string[];
+      }[];
 };
 
 export type TournamentState = {

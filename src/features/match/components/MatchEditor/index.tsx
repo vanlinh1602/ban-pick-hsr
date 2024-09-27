@@ -168,7 +168,7 @@ const MatchEditor = ({ id }: Props) => {
 
   return (
     <div
-      className="flex flex-col md:grid md:grid-cols-2 gap-4 overflow-y-scroll "
+      className="flex flex-col md:grid md:grid-cols-2 gap-4 overflow-y-scroll no-scrollbar"
       style={{
         height: 'calc(100vh - 220px)',
       }}

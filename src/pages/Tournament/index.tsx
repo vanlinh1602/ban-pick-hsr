@@ -19,14 +19,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DoubleElimination } from '@/features/match/components';
 import { useMatchSlice } from '@/features/match/store';
 import { selectMatchOfTournament } from '@/features/match/store/selectors';
 import { Match } from '@/features/match/types';
-import {
-  BracketDisplay,
-  EditTournament,
-  ViewPlayers,
-} from '@/features/tournament/components';
+import { EditTournament, ViewPlayers } from '@/features/tournament/components';
 import { useTournamentSlice } from '@/features/tournament/store';
 import { selectTournamentData } from '@/features/tournament/store/selectors';
 import { translations } from '@/locales/translations';
@@ -96,47 +93,52 @@ const TournamentDetails = () => {
 
       const now = Date.now();
 
-      tournament?.rounds?.forEach((round) => {
+      tournament?.rounds?.forEach((round, index) => {
         const matchesRound: Match[] = [];
-        round.matches.forEach((matchId) => {
-          const match = tournamentMatches[matchId];
-          if (!match) return;
-          matchesRound.push(match);
-          const { players: matchPlayers, winner, games, date } = match;
-          const gameResults = games?.reduce(
-            (acc, game) => {
-              const { player, points } = game;
-              acc[player - 1].points += points;
-              if (winner === player) {
-                acc[player - 1].matchesWon += 1;
+        Object.values(round).forEach((matches) => {
+          matches.forEach((matchId) => {
+            const match = tournamentMatches[matchId];
+            if (!match) return;
+            matchesRound.push(match);
+            const { players: matchPlayers, winner, games, date } = match;
+            const gameResults = games?.reduce(
+              (acc, game) => {
+                const { player, points } = game;
+                acc[player - 1].points += points;
+                if (winner === player) {
+                  acc[player - 1].matchesWon += 1;
+                }
+                return acc;
+              },
+              [
+                { points: 0, matchesWon: 0 },
+                { points: 0, matchesWon: 0 },
+              ] as { points: number; matchesWon: number }[],
+            );
+            matchPlayers?.forEach((player, index) => {
+              if (!initialData.players[player.id]) {
+                initialData.players[player.id] = {
+                  name: player.name,
+                  points: 0,
+                  matchesWon: 0,
+                };
               }
-              return acc;
-            },
-            [
-              { points: 0, matchesWon: 0 },
-              { points: 0, matchesWon: 0 },
-            ] as { points: number; matchesWon: number }[],
-          );
-          matchPlayers?.forEach((player, index) => {
-            if (!initialData.players[player.id]) {
-              initialData.players[player.id] = {
-                name: player.name,
-                points: 0,
-                matchesWon: 0,
-              };
+              initialData.players[player.id].points +=
+                gameResults?.[index]?.points || 0;
+              initialData.players[player.id].matchesWon +=
+                gameResults?.[index]?.matchesWon || 0;
+            });
+            if (date && date >= now) {
+              initialData.upcomingMatches.push(match);
+            } else {
+              initialData.completedMatches.push(match);
             }
-            initialData.players[player.id].points +=
-              gameResults?.[index]?.points || 0;
-            initialData.players[player.id].matchesWon +=
-              gameResults?.[index]?.matchesWon || 0;
           });
-          if (date && date >= now) {
-            initialData.upcomingMatches.push(match);
-          } else {
-            initialData.completedMatches.push(match);
-          }
         });
-        initialData.rounds.push({ round: round.round, matches: matchesRound });
+        initialData.rounds.push({
+          round: `Round ${index + 1}`,
+          matches: matchesRound,
+        });
       });
 
       return {
@@ -462,7 +464,7 @@ const TournamentDetails = () => {
           </section>
         </div>
         <section
-          className="mt-12 bg-white rounded-lg shadow-lg p-6"
+          className="mt-12 bg-white rounded-lg shadow-lg p-6 overflow-scroll no-scrollbar"
           aria-labelledby="structure-title"
         >
           <div className="flex items-center justify-between">
@@ -478,7 +480,9 @@ const TournamentDetails = () => {
               onClick={() => navigator(`/tournament/${id}/edit`)}
             />
           </div>
-          <BracketDisplay />
+          <div className="overflow-scroll max-h-fit">
+            <DoubleElimination />
+          </div>
         </section>
       </div>
     </>
