@@ -7,9 +7,52 @@ import type { CatalogState } from '../types';
 export const initialState: CatalogState = {
   handling: false,
   data: {
-    characters: [],
-    combatTypes: [],
-    paths: [],
+    characters: {},
+    lightCones: {},
+    filterCharacter: {
+      character_combat_type: {
+        key: 'character_combat_type',
+        text: 'Combat Type',
+        values: [],
+      },
+      character_paths: {
+        key: 'character_paths',
+        text: 'Paths',
+        values: [],
+      },
+      character_rarity: {
+        key: 'character_rarity',
+        text: 'Rarity',
+        values: [],
+      },
+      character_factions: {
+        key: 'character_factions',
+        text: 'Factions',
+        values: [],
+      },
+    },
+    filterLightCone: {
+      equipment_paths: {
+        key: 'equipment_paths',
+        text: 'Paths',
+        values: [],
+      },
+      equipment_rarity: {
+        key: 'equipment_rarity',
+        text: 'Rarity',
+        values: [],
+      },
+      equipment_skill_type: {
+        key: 'equipment_skill_type',
+        text: 'Skill Type',
+        values: [],
+      },
+      equipment_source: {
+        key: 'equipment_source',
+        text: 'Source',
+        values: [],
+      },
+    },
   },
 };
 
