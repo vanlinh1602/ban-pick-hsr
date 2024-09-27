@@ -99,7 +99,8 @@ const TournamentDetails = () => {
       tournament?.rounds?.forEach((round) => {
         const matchesRound: Match[] = [];
         round.matches.forEach((matchId) => {
-          const match = tournamentMatches[matchId] || {};
+          const match = tournamentMatches[matchId];
+          if (!match) return;
           matchesRound.push(match);
           const { players: matchPlayers, winner, games, date } = match;
           const gameResults = games?.reduce(
