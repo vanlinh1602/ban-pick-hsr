@@ -3,7 +3,7 @@ export interface Character {
   name: string;
   icon: string;
   background: string;
-  path: Value[];
+  paths: Value[];
   rarity: Value[];
   combatType: Value[];
   factions: Value[];
@@ -64,6 +64,10 @@ export type CombatType = {
   enum_string: string;
 };
 
+export type Configs = {
+  points: number;
+};
+
 export type CatalogState = {
   handling: boolean;
   data: {
@@ -72,4 +76,5 @@ export type CatalogState = {
     filterCharacter: FilterCharacter;
     filterLightCone: FilterLightCone;
   };
+  configs: CustomObject<Configs>;
 };

@@ -2,9 +2,11 @@ import { FiEdit2 } from 'react-icons/fi';
 
 import { Checkbox } from '@/components/ui/checkbox';
 type Props = {
+  roundImg?: boolean;
   item: {
     name: string;
     points: number;
+    rarity: any[];
     avatar: string;
     id: string;
   };
@@ -12,7 +14,15 @@ type Props = {
   onClick: (id: string, action: 'select' | 'edit') => void;
 };
 
-const PointsCard = ({ item, selected, onClick }: Props) => {
+const PointsCard = ({ item, selected, onClick, roundImg }: Props) => {
+  let rarityColor = '';
+  if (item.rarity[0]?.id === '1719') {
+    rarityColor = 'text-blue-400';
+  } else if (['1468', '1725'].includes(item.rarity[0]?.id)) {
+    rarityColor = 'text-purple-400';
+  } else if (['1488', '1738'].includes(item.rarity[0]?.id)) {
+    rarityColor = 'text-yellow-400';
+  }
   return (
     <div
       key={item.id}
@@ -20,15 +30,27 @@ const PointsCard = ({ item, selected, onClick }: Props) => {
         selected ? 'ring-2 ring-blue-500' : ''
       } flex justify-between`}
     >
-      <div className="flex items-center space-x-4">
+      <div
+        className="flex items-center space-x-4"
+        onClick={() => onClick(item.id, 'select')}
+      >
         <img
           src={item.avatar}
           alt={item.name}
-          className="w-16 h-16 rounded-full object-cover"
+          className={`w-16 h-16 ${roundImg ? 'rounded-full' : 'rounded'} object-cover`}
         />
         <div className="flex flex-col text-start overflow-hidden">
-          <p className="text-xl font-semibold line-clamp-1">{item.name}</p>
-          <p className="text-gray-600">Points: {item.points}</p>
+          <p className="text-base font-semibold line-clamp-1">{item.name}</p>
+          <p className="text-sm text-gray-600">
+            <b>Rarity:</b>
+            <b className={`ml-2 ${rarityColor}`}>
+              {item.rarity[0]?.value || 'Unknown'}
+            </b>
+          </p>
+          <p className="text-sm text-gray-600">
+            <b>Points:</b>
+            <b className="ml-2">{item.points}</b>
+          </p>
         </div>
       </div>
       <div className="flex flex-col items-center justify-between">
@@ -40,7 +62,7 @@ const PointsCard = ({ item, selected, onClick }: Props) => {
           }}
         />
         <FiEdit2
-          className="text-xl text-blue-400"
+          className="text-xl text-blue-400 z-10"
           onClick={() => onClick(item.id, 'edit')}
         />
       </div>

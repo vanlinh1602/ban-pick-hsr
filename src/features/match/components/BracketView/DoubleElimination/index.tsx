@@ -410,7 +410,6 @@ const DoubleElimination = () => {
   //       });
   //     });
   //   });
-  //   console.log('tmp', tmp);
 
   //   return tmp;
   // }, [rounds]);

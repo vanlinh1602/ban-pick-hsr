@@ -30,3 +30,8 @@ export const selectFilterLightCone = createSelector(
   [selectDomain],
   (state) => state.data.filterLightCone,
 );
+
+export const selectConfigs = createSelector(
+  [selectDomain],
+  (state) => state.configs,
+);

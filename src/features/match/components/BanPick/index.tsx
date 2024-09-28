@@ -118,7 +118,7 @@ const BanPick = ({ id }: Props) => {
       if (
         filter?.path &&
         filter.path !== 'all' &&
-        !char.path.some(({ id }) => id === filter.path)
+        !char.paths.some(({ id }) => id === filter.path)
       )
         return false;
       if (
