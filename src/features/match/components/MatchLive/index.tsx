@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+} from '@/components/ui/alert-dialog-ui';
 import { Button } from '@/components/ui/button';
 import { selectCharacters } from '@/features/catalogs/store/selectors';
 import type { Character } from '@/features/catalogs/types';
