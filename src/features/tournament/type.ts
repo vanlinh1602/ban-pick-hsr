@@ -15,14 +15,8 @@ export type Tournament = {
   description: string;
   players: Player[];
   format: 'single' | 'double';
-  rounds?:
-    | {
-        matches: string[];
-      }[]
-    | {
-        winnersBracket: string[];
-        losersBracket: string[];
-      }[];
+  status: 'set-up' | 'start' | 'finished';
+  rounds?: CustomObject<string[]>[];
 };
 
 export type TournamentState = {

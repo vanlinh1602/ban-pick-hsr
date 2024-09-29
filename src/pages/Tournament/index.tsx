@@ -19,7 +19,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DoubleElimination } from '@/features/match/components';
+import {
+  DoubleElimination,
+  SingleElimination,
+} from '@/features/match/components';
 import { useMatchSlice } from '@/features/match/store';
 import { selectMatchOfTournament } from '@/features/match/store/selectors';
 import { Match } from '@/features/match/types';
@@ -36,10 +39,6 @@ type TournamentData = {
   }[];
   upcomingMatches: Match[];
   completedMatches: Match[];
-  rounds: {
-    round: string;
-    matches: Match[];
-  }[];
 };
 
 const TournamentDetails = () => {
@@ -59,6 +58,7 @@ const TournamentDetails = () => {
   );
 
   const [expandedMatch, setExpandedMatch] = useState<string>();
+  const [rounds, setRounds] = useState<CustomObject<Match[]>[]>([]);
   const [sortCriteria, setSortCriteria] = useState('ranking');
   const [isEditing, setIsEditing] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
@@ -70,6 +70,20 @@ const TournamentDetails = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (tournament && Object.keys(tournamentMatches).length) {
+      const matchsData: CustomObject<Match[]>[] = [];
+      tournament.rounds?.forEach((round) => {
+        const tmp: CustomObject<Match[]> = {};
+        Object.entries(round).forEach(([key, value]) => {
+          tmp[key] = value.map((id: string) => tournamentMatches[id]);
+        });
+        matchsData.push(tmp);
+      });
+      setRounds(matchsData);
+    }
+  }, [tournament, tournamentMatches]);
+
   const { players, upcomingMatches, completedMatches }: TournamentData =
     useMemo(() => {
       const initialData: {
@@ -80,26 +94,19 @@ const TournamentDetails = () => {
         }>;
         upcomingMatches: Match[];
         completedMatches: Match[];
-        rounds: {
-          round: string;
-          matches: Match[];
-        }[];
       } = {
         players: {},
         upcomingMatches: [],
         completedMatches: [],
-        rounds: [],
       };
 
       const now = Date.now();
 
-      tournament?.rounds?.forEach((round, index) => {
-        const matchesRound: Match[] = [];
+      tournament?.rounds?.forEach((round) => {
         Object.values(round).forEach((matches) => {
           matches.forEach((matchId) => {
             const match = tournamentMatches[matchId];
             if (!match) return;
-            matchesRound.push(match);
             const { players: matchPlayers, winner, games, date } = match;
             const gameResults = games?.reduce(
               (acc, game) => {
@@ -128,16 +135,14 @@ const TournamentDetails = () => {
               initialData.players[player.id].matchesWon +=
                 gameResults?.[index]?.matchesWon || 0;
             });
-            if (date && date >= now) {
-              initialData.upcomingMatches.push(match);
-            } else {
-              initialData.completedMatches.push(match);
+            if (match.players.length === 2) {
+              if (date && date >= now) {
+                initialData.upcomingMatches.push(match);
+              } else {
+                initialData.completedMatches.push(match);
+              }
             }
           });
-        });
-        initialData.rounds.push({
-          round: `Round ${index + 1}`,
-          matches: matchesRound,
         });
       });
 
@@ -147,7 +152,6 @@ const TournamentDetails = () => {
           .map((player, index) => ({ ...player, ranking: index + 1 })),
         upcomingMatches: initialData.upcomingMatches,
         completedMatches: initialData.completedMatches,
-        rounds: initialData.rounds,
       };
     }, [tournament, tournamentMatches]);
 
@@ -464,7 +468,7 @@ const TournamentDetails = () => {
           </section>
         </div>
         <section
-          className="mt-12 bg-white rounded-lg shadow-lg p-6 overflow-scroll no-scrollbar"
+          className="mt-12 bg-white rounded-lg shadow-lg p-6 "
           aria-labelledby="structure-title"
         >
           <div className="flex items-center justify-between">
@@ -480,8 +484,13 @@ const TournamentDetails = () => {
               onClick={() => navigator(`/tournament/${id}/edit`)}
             />
           </div>
-          <div className="overflow-scroll max-h-fit">
-            <DoubleElimination />
+          <div className="h-96">
+            {tournament?.format === 'single' ? (
+              <SingleElimination rounds={(rounds || []) as any} />
+            ) : null}
+            {tournament?.format === 'double' ? (
+              <DoubleElimination rounds={(rounds || []) as any} />
+            ) : null}
           </div>
         </section>
       </div>

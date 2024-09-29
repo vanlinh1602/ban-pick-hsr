@@ -22,7 +22,7 @@ import type { Character } from '@/features/catalogs/types';
 import { socket } from '@/services/socket';
 
 import { useMatchSlice } from '../../store';
-import { selectMatchData } from '../../store/selectors';
+import { selectLiveActions, selectMatchData } from '../../store/selectors';
 
 type Filter = {
   path?: string;
@@ -36,7 +36,7 @@ type Props = {
 
 const BanPick = ({ id }: Props) => {
   const location = useLocation();
-  const { state } = location;
+  const { state, search } = location;
 
   const dispatch = useDispatch();
   const { actions } = useMatchSlice();
@@ -44,6 +44,7 @@ const BanPick = ({ id }: Props) => {
   const matchData = useSelector((state: any) => selectMatchData(state, id));
   const characters = useSelector(selectCharacters);
   const filterCharacter = useSelector(selectFilterCharacter);
+  const liveActions = useSelector(selectLiveActions);
 
   const { matchSetup } = matchData || {};
   const [player, setPlayer] = useState<number>();
@@ -99,10 +100,12 @@ const BanPick = ({ id }: Props) => {
   }, [matchData.matchSetup?.banPickStatus]);
 
   useEffect(() => {
-    const { securityId } = state || {};
-    if (securityId) {
+    const params = new URLSearchParams(search);
+    const security = params.get('s') || state?.securityId;
+
+    if (security) {
       const findedPlayer = matchData.players?.findIndex((p) => {
-        return p.id === securityId;
+        return p.id === security;
       });
       if (findedPlayer !== -1) {
         setPlayer(findedPlayer + 1);
@@ -170,7 +173,7 @@ const BanPick = ({ id }: Props) => {
           selectCharacter?.id === character.id
             ? 'ring-4 ring-blue-500'
             : 'hover:ring-2 hover:ring-gray-300'
-        } flex flex-col items-center w-full h-full`}
+        } flex flex-col items-center w-full h-32 `}
         disabled={player !== activeTurn.player}
         onClick={() => {
           setSelectCharacter(character);
@@ -191,26 +194,48 @@ const BanPick = ({ id }: Props) => {
           alt={character.name}
           className="w-20 h-20 object-cover rounded-lg"
         />
-        <div className="mt-1 text-sm max-l">{character.name}</div>
+        <div className="mt-1 text-sm max-l text-ellipsis">{character.name}</div>
       </button>
     ));
   };
 
-  const renderUserSection = (player: number) => {
-    const playerInfo = matchData.players?.[player - 1];
-    const playerMatchData = playerData[`player${player}`];
+  const renderUserSection = (matchPlayer: number) => {
+    const playerInfo = matchData.players?.[matchPlayer - 1];
+    const playerMatchData = playerData[`player${matchPlayer}`];
     return (
       <div
         className={`flex flex-col items-center w-40 ${
-          player === 1 ? 'order-first' : 'order-last'
+          matchPlayer === 1 ? 'order-first' : 'order-last'
         }`}
       >
         <div
           className={`w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center ${
-            activeTurn.player === player ? 'ring-4 ring-yellow-400' : ''
+            activeTurn.player === matchPlayer ? 'ring-4 ring-yellow-400' : ''
           }`}
         >
-          <FaUser className="text-4xl text-gray-600" />
+          {player === matchPlayer ? (
+            <>
+              {selectCharacter?.icon ? (
+                <img
+                  className="w-20 h-20 rounded-full"
+                  src={selectCharacter?.icon}
+                />
+              ) : (
+                <FaUser className="text-4xl text-gray-600" />
+              )}
+            </>
+          ) : (
+            <>
+              {liveActions?.banPick?.character ? (
+                <img
+                  className="w-20 h-20 rounded-full"
+                  src={characters[liveActions.banPick.character].icon}
+                />
+              ) : (
+                <FaUser className="text-4xl text-gray-600" />
+              )}
+            </>
+          )}
         </div>
         <span className="mt-2 p-1 text-center">{playerInfo.name}</span>
         <div className="mt-4">

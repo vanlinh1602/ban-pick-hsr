@@ -31,10 +31,10 @@ export default function BanPickCard({ state, info }: Props) {
             <img
               src={info.image}
               alt={info.name}
-              className="w-full h-29 bg-cover rounded"
+              className="w-full h-40 bg-cover rounded"
             />
           ) : (
-            <div className="w-full h-24 object-cover rounded" />
+            <div className="w-full h-40 object-cover rounded" />
           )}
           <div className="absolute inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
             <span className="text-white text-xs font-bold">{info.name}</span>

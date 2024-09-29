@@ -109,7 +109,7 @@ const PointsAdjuster = () => {
       return Object.entries(rest).every(([key, value]) => {
         if (!value || value === 'all') return true;
         if (Array.isArray(item[key])) {
-          return item[key].some((v) => v.id === value);
+          return item[key].some((v: any) => v.id === value);
         }
         return item[key].id === value;
       });

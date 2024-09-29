@@ -45,8 +45,8 @@ const slice = createSlice({
     saveBracket(
       state,
       _action: PayloadAction<{
-        id: string;
-        rounds: Match[][];
+        tournament: Partial<Tournament>;
+        rounds: CustomObject<Match[]>[];
       }>,
     ) {
       state.handling = true;

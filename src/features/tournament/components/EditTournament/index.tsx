@@ -66,6 +66,9 @@ const EditTournament = ({ onClose, onConfirm, data }: Props) => {
       organizer: values.organizer,
       description: values.description,
     };
+    if (!tournamentUpdate.status) {
+      tournamentUpdate.status = 'set-up';
+    }
     onConfirm(tournamentUpdate);
   };
 

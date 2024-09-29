@@ -1,161 +1,138 @@
-import {
-  Match as MatchComponent,
-  SingleEliminationBracket,
-} from '@g-loot/react-tournament-brackets/dist/cjs';
+import _ from 'lodash';
+import { useCallback, useEffect, useState } from 'react';
 
-// type Props = {
-//   rounds: {
-//     matches: Match[];
-//   }[];
-// };
+import { Match } from '@/features/match/types';
+import { Player } from '@/features/tournament/type';
+import { generateID } from '@/lib/utils';
 
-const data = [
-  {
-    id: 19753,
-    nextMatchId: null,
-    tournamentRoundText: '3',
-    startTime: '2021-05-30',
-    state: 'SCHEDULED',
-    participants: [],
-  },
-  {
-    id: 19754,
-    nextMatchId: 19753,
-    tournamentRoundText: '2',
-    startTime: '2021-05-30',
-    state: 'SCHEDULED',
-    participants: [
-      {
-        id: '14754a1a-932c-4992-8dec-f7f94a339960',
-        resultText: null,
-        isWinner: false,
-        status: null,
-        name: 'CoKe BoYz',
-        picture: 'teamlogos/client_team_default_logo',
-      },
-    ],
-  },
-  {
-    id: 19755,
-    nextMatchId: 19754,
-    tournamentRoundText: '1',
-    startTime: '2021-05-30',
-    state: 'SCORE_DONE',
-    participants: [
-      {
-        id: '14754a1a-932c-4992-8dec-f7f94a339960',
-        resultText: 'Won',
-        isWinner: true,
-        status: 'PLAYED',
-        name: 'CoKe BoYz',
-        picture: 'teamlogos/client_team_default_logo',
-      },
-      {
-        id: 'd16315d4-7f2d-427b-ae75-63a1ae82c0a8',
-        resultText: 'Lost',
-        isWinner: false,
-        status: 'PLAYED',
-        name: 'Aids Team',
-        picture: 'teamlogos/client_team_default_logo',
-      },
-    ],
-  },
-  {
-    id: 19756,
-    nextMatchId: 19754,
-    tournamentRoundText: '1',
-    startTime: '2021-05-30',
-    state: 'RUNNING',
-    participants: [
-      {
-        id: 'd8b9f00a-0ffa-4527-8316-da701894768e',
-        resultText: null,
-        isWinner: false,
-        status: null,
-        name: 'Art of kill',
-        picture: 'teamlogos/client_team_default_logo',
-      },
-    ],
-  },
-  {
-    id: 19757,
-    nextMatchId: 19753,
-    tournamentRoundText: '2',
-    startTime: '2021-05-30',
-    state: 'SCHEDULED',
-    participants: [],
-  },
-  {
-    id: 19758,
-    nextMatchId: 19757,
-    tournamentRoundText: '1',
-    startTime: '2021-05-30',
-    state: 'SCHEDULED',
-    participants: [
-      {
-        id: '9397971f-4b2f-44eb-a094-722eb286c59b',
-        resultText: null,
-        isWinner: false,
-        status: null,
-        name: 'Crazy Pepes',
-        picture: 'teamlogos/client_team_default_logo',
-      },
-    ],
-  },
-  {
-    id: 19759,
-    nextMatchId: 19757,
-    tournamentRoundText: '1',
-    startTime: '2021-05-30',
-    state: 'SCHEDULED',
-    participants: [
-      {
-        id: '42fecd89-dc83-4821-80d3-718acb50a30c',
-        resultText: null,
-        isWinner: false,
-        status: null,
-        name: 'BLUEJAYS',
-        picture: 'teamlogos/client_team_default_logo',
-      },
-      {
-        id: 'df01fe2c-18db-4190-9f9e-aa63364128fe',
-        resultText: null,
-        isWinner: false,
-        status: null,
-        name: 'Bosphorus',
-        picture: 'teamlogos/r7zn4gr8eajivapvjyzd',
-      },
-    ],
-  },
-];
+import { MatchEditorModal } from '../MatchEditorModal';
+import { ViewMatch } from '../ViewMatch';
 
-const SingleElimination = () => {
-  // const finalWidth = Math.max(window.innerWidth - 50, 500);
-  // const finalHeight = Math.max(window.innerHeight - 100, 500);
+type Props = {
+  rounds: { matches: Match[] }[];
+  allowEdit?: boolean;
+  players?: Player[];
+  onSubmitEdit?: (roundIndex: number, data: Match) => void;
+};
 
-  // const matches: MatchType[] = useMemo(() => {
-  //   const tmp: MatchType[] = [];
-  //   rounds.forEach((round, index) => {
-  //     round.matches.forEach((match, matchIndex) => {
-  //       tmp.push({
-  //         id: match.id,
-  //         nextMatchId:
-  //           rounds[index + 1]?.matches[Math.floor(matchIndex / 2)]?.id || '',
-  //         startTime: '',
-  //         state: 'WALK_OVER',
-  //         participants: match.players.map((player) => ({
-  //           id: player.id,
-  //           isWinner: false,
-  //           name: player.name,
-  //         })),
-  //       });
-  //     });
-  //   });
-  //   return tmp;
-  // }, [rounds]);
+const SingleElimination = ({
+  rounds,
+  allowEdit,
+  players,
+  onSubmitEdit,
+}: Props) => {
+  const [activeRounds, setActiveRounds] = useState<{ matches: Match[] }[]>([]);
+  const [selectedMatch, setSelectedMatch] = useState<{
+    roundIndex: number;
+    data: Match;
+  }>();
+
+  useEffect(() => {
+    const paramsRound = _.cloneDeep(rounds);
+    const initRounds: { matches: Match[] }[] = [];
+    if (paramsRound.length > 1) {
+      if (paramsRound[0].matches.length < paramsRound[1].matches.length * 2) {
+        const firstRound = paramsRound.shift();
+        const arr: any[] = _.range(paramsRound[0].matches.length * 2).map(
+          () => ({}),
+        );
+
+        firstRound?.matches.forEach((match) => {
+          const nextMatch = match?.winMatch!.split('-')[1];
+          if (!_.size(_.get(arr, [Number(nextMatch) * 2]))) {
+            _.set(arr, [Number(nextMatch) * 2], match);
+          } else {
+            _.set(arr, [Number(nextMatch) * 2 + 1], match);
+          }
+        });
+        initRounds.push({ matches: arr });
+      }
+    }
+    initRounds.push(...paramsRound);
+    setActiveRounds(initRounds);
+  }, [rounds]);
+
+  const renderMatches = useCallback(
+    (matches: Match[], roundIndex: number) => {
+      return matches.map((match) => {
+        if (!_.size(match)) {
+          return (
+            <div key={generateID()} className="w-full p-4">
+              <p className="h-7"></p>
+            </div>
+          );
+        }
+        return (
+          <div
+            key={match.id}
+            className="relative p-4 mb-4 bg-white rounded-lg shadow-md transition-all duration-300 hover:shadow-lg"
+            onClick={() => setSelectedMatch({ roundIndex, data: match })}
+            tabIndex={0}
+            role="button"
+          >
+            <div className="flex items-center h-7">
+              <span
+                className={`font-semibold w-5/12 ${match.winner === 1 ? 'text-green-600' : 'text-gray-700'}`}
+              >
+                {match.players[0]?.name || 'TBD'}
+              </span>
+              <span className="text-sm text-gray-500 w-2/12">vs</span>
+              <span
+                className={`font-semibold w-5/12 ${match.winner === 2 ? 'text-green-600' : 'text-gray-700'}`}
+              >
+                {match.players[1]?.name || 'TBD'}
+              </span>
+            </div>
+          </div>
+        );
+      });
+    },
+    [setSelectedMatch],
+  );
 
   return (
-    <SingleEliminationBracket matches={data} matchComponent={MatchComponent} />
+    <>
+      {selectedMatch ? (
+        <>
+          {allowEdit ? (
+            <MatchEditorModal
+              match={selectedMatch.data}
+              onClose={() => setSelectedMatch(undefined)}
+              allPlayers={players || []}
+              onSubmit={(match) => {
+                onSubmitEdit?.(selectedMatch.roundIndex, match);
+              }}
+            />
+          ) : (
+            <ViewMatch
+              match={selectedMatch.data}
+              onClose={() => setSelectedMatch(undefined)}
+            />
+          )}
+        </>
+      ) : null}
+      <div className="container mx-auto p-4 max-h-full h-full ">
+        <div className="flex flex-col md:flex-row  space-y-8 md:space-y-0 md:space-x-4">
+          {activeRounds.map((_round, index) => (
+            <div
+              key={index}
+              className="flex w-52 justify-center text-xl font-semibold bg-[#1e2235] text-white p-1 rounded-lg"
+            >
+              Round {index + 1}
+            </div>
+          ))}
+        </div>
+        <div className="w-full overflow-scroll h-full">
+          <div className="flex flex-row space-y-0 space-x-4">
+            {activeRounds.map((round, index) => (
+              <div key={index} className="flex flex-col justify-around w-52">
+                {renderMatches(round.matches, index)}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

@@ -10,6 +10,13 @@ export type MatchSetUpInfo = {
   goFirst: number;
 };
 
+export type MatchGame = {
+  player: number;
+  characters: string[];
+  lightCones: string[];
+  points: number;
+};
+
 export type Match = {
   id: string;
   players: Player[];
@@ -17,11 +24,9 @@ export type Match = {
   date?: number;
   tournamentId?: string;
   winner?: number;
-  games?: {
-    player: number;
-    characters: string[];
-    points: number;
-  }[];
+  winMatch?: string;
+  lossMatch?: string;
+  games?: MatchGame[];
   host?: {
     id: string;
     email?: string;

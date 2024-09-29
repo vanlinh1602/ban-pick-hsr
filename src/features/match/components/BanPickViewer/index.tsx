@@ -6,6 +6,7 @@ import { BanPickCard } from '@/components';
 import { selectCharacters } from '@/features/catalogs/store/selectors';
 
 import { selectLiveActions, selectMatchData } from '../../store/selectors';
+import MatchUrlModal from '../MatchUrlModal';
 
 type Props = {
   id: string;
@@ -20,6 +21,7 @@ const BanPickViewer = ({ id }: Props) => {
   const matchData = useSelector((state: any) => selectMatchData(state, id!));
   const characters = useSelector(selectCharacters);
   const liveActions = useSelector(selectLiveActions);
+  const [showModal, setShowModal] = useState(false);
   const [state, setState] = useState<string>();
 
   const players = useMemo(() => {
@@ -63,10 +65,16 @@ const BanPickViewer = ({ id }: Props) => {
 
   return (
     <div>
-      {/* <h2 className="max-w-4xl mx-auto p-6 bg-slate-300 rounded-lg shadow-lg m-5 text-2xl font-semibold">
-        Ban Pick Viewer
-      </h2> */}
-      <div className="flex flex-col md:flex-row justify-center items-stretch bg-gray-100 p-4">
+      {showModal ? (
+        <MatchUrlModal match={matchData} onClose={() => setShowModal(false)} />
+      ) : null}
+      <h2
+        className=" font-semibold text-blue-400 underline cursor-pointer"
+        onClick={() => setShowModal(true)}
+      >
+        Click here to get the link to share this match
+      </h2>
+      <div className="flex flex-col md:flex-row justify-center items-stretch bg-gray-100 p-4 pt-0">
         {players.map((player, index) => (
           <div
             key={index}
@@ -80,7 +88,7 @@ const BanPickViewer = ({ id }: Props) => {
             </div>
             <div className="p-4">
               <h3 className="text-lg font-semibold mb-2">Banned Characters</h3>
-              <div className="grid grid-cols-3 gap-2 mb-4">
+              <div className="grid grid-cols-3 gap-2 mb-4 h-40 w-full">
                 {player.ban.map((ban, index) => {
                   let info = ban;
                   if (ban.id === liveActions?.banPick?.key) {

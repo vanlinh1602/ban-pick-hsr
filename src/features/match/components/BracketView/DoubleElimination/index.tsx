@@ -1,429 +1,138 @@
-import {
-  DoubleEliminationBracket,
-  Match as MatchComponent,
-} from '@g-loot/react-tournament-brackets/dist/cjs';
+import _ from 'lodash';
+import { useCallback, useEffect, useState } from 'react';
 
-// type Props = {
-//   rounds: {
-//     winnersBracket: Match[];
-//     losersBracket: Match[];
-//   }[];
-// };
+import { Match } from '@/features/match/types';
+import { Player } from '@/features/tournament/type';
+import { generateID } from '@/lib/utils';
 
-const simpleDoubleFull = {
-  upper: [
-    {
-      id: 20512,
-      name: 'UB Semi Final',
-      nextMatchId: 20515,
-      nextLooserMatchId: 20502,
-      tournamentRoundText: 'UB 3',
-      startTime: 'August 05, 2021',
-      state: 'SCORE_DONE',
-      participants: [
-        {
-          id: 'a3c107d2-ded2-4f33-85e7-2215805f664b',
-          resultText: '0',
-          isWinner: false,
-          status: 'PLAYED',
-          name: 'BTC',
-        },
-        {
-          id: 'a3fb4b05-d4ee-4efe-84cf-b500cdbdbbe0',
-          resultText: '2',
-          isWinner: true,
-          status: 'PLAYED',
-          name: 'Towby',
-        },
-      ],
-    },
-    {
-      id: 20513,
-      name: 'UB 2.1',
-      nextMatchId: 20512,
-      nextLooserMatchId: 20506,
-      tournamentRoundText: 'UB 2',
-      startTime: 'August 05, 2021',
-      state: 'SCORE_DONE',
-      participants: [
-        {
-          id: '8cf422cd-a99d-4184-b2cd-70ee481f46b3',
-          resultText: '0',
-          isWinner: false,
-          status: 'PLAYED',
-          name: 'GlootOne',
-        },
-        {
-          id: 'a3fb4b05-d4ee-4efe-84cf-b500cdbdbbe0',
-          resultText: '2',
-          isWinner: true,
-          status: 'PLAYED',
-          name: 'Towby',
-        },
-      ],
-    },
-    {
-      id: 20514,
-      name: 'UB 1.2',
-      nextMatchId: 20513,
-      nextLooserMatchId: 20505,
-      tournamentRoundText: 'UB 1',
-      startTime: 'August 05, 2021',
-      state: 'SCORE_DONE',
-      participants: [
-        {
-          id: 'a3fb4b05-d4ee-4efe-84cf-b500cdbdbbe0',
-          resultText: '2',
-          isWinner: true,
-          status: 'PLAYED',
-          name: 'Towby',
-        },
-        {
-          id: '12046e66-adbf-49d9-98c1-bed16d5ced29',
-          resultText: '1',
-          isWinner: false,
-          status: 'PLAYED',
-          name: 'Alex',
-        },
-      ],
-    },
-    {
-      id: 20515,
-      name: 'Final',
-      nextMatchId: null,
-      nextLooserMatchId: null,
-      tournamentRoundText: 'UB 4',
-      startTime: 'August 05, 2021',
-      state: 'SCORE_DONE',
-      participants: [
-        {
-          id: '3d1a5ddb-85b7-4724-b94d-8747454d66e9',
-          resultText: '2',
-          isWinner: true,
-          status: 'PLAYED',
-          name: 'SeatloN',
-        },
-        {
-          id: 'a3fb4b05-d4ee-4efe-84cf-b500cdbdbbe0',
-          resultText: '1',
-          isWinner: false,
-          status: 'PLAYED',
-          name: 'Towby',
-        },
-      ],
-    },
-    {
-      id: 20508,
-      name: 'UB 1.4',
-      nextMatchId: 20510,
-      nextLooserMatchId: 20503,
-      tournamentRoundText: 'UB 1',
-      startTime: 'August 05, 2021',
-      state: 'SCORE_DONE',
-      participants: [
-        {
-          id: 'dd6c4bff-80da-449c-8bfa-24c835af013a',
-          resultText: '0',
-          isWinner: false,
-          status: 'PLAYED',
-          name: 'OmarDev',
-        },
-        {
-          id: 'a3c107d2-ded2-4f33-85e7-2215805f664b',
-          resultText: '2',
-          isWinner: true,
-          status: 'PLAYED',
-          name: 'BTC',
-        },
-      ],
-    },
-    {
-      id: 20509,
-      name: 'UB 1.1',
-      nextMatchId: 20513,
-      nextLooserMatchId: 20505,
-      tournamentRoundText: 'UB 1',
-      startTime: 'August 05, 2021',
-      state: 'SCORE_DONE',
-      participants: [
-        {
-          id: '8cf422cd-a99d-4184-b2cd-70ee481f46b3',
-          resultText: '2',
-          isWinner: true,
-          status: 'PLAYED',
-          name: 'GlootOne',
-        },
-        {
-          id: 'e1e48aad-5e29-41dc-b904-16f152a7ec74',
-          resultText: '0',
-          isWinner: false,
-          status: 'PLAYED',
-          name: 'spacefudg3',
-        },
-      ],
-    },
-    {
-      id: 20510,
-      name: 'UB 2.2',
-      nextMatchId: 20512,
-      nextLooserMatchId: 20504,
-      tournamentRoundText: 'UB 2',
-      startTime: 'August 05, 2021',
-      state: 'SCORE_DONE',
-      participants: [
-        {
-          id: 'a3c107d2-ded2-4f33-85e7-2215805f664b',
-          resultText: '2',
-          isWinner: true,
-          status: 'PLAYED',
-          name: 'BTC',
-        },
-        {
-          id: '3d1a5ddb-85b7-4724-b94d-8747454d66e9',
-          resultText: '1',
-          isWinner: false,
-          status: 'PLAYED',
-          name: 'SeatloN',
-        },
-      ],
-    },
-    {
-      id: 20511,
-      name: 'UB 1.3',
-      nextMatchId: 20510,
-      nextLooserMatchId: 20503,
-      tournamentRoundText: 'UB 1',
-      startTime: 'August 05, 2021',
-      state: 'SCORE_DONE',
-      participants: [
-        {
-          id: '3d1a5ddb-85b7-4724-b94d-8747454d66e9',
-          resultText: '2',
-          isWinner: true,
-          status: 'PLAYED',
-          name: 'SeatloN',
-        },
-        {
-          id: 'fabb2218-49d6-41a2-874c-d6cd6928df70',
-          resultText: '1',
-          isWinner: false,
-          status: 'PLAYED',
-          name: 'jackieboi',
-        },
-      ],
-    },
-  ],
-  lower: [
-    {
-      id: 20502,
-      name: 'LB Semi Final',
-      nextMatchId: 20515,
-      nextLooserMatchId: null,
-      tournamentRoundText: 'LB 4',
-      startTime: 'August 05, 2021',
-      state: 'SCORE_DONE',
-      participants: [
-        {
-          id: 'a3c107d2-ded2-4f33-85e7-2215805f664b',
-          resultText: '1',
-          isWinner: false,
-          status: 'PLAYED',
-          name: 'BTC',
-        },
-        {
-          id: '3d1a5ddb-85b7-4724-b94d-8747454d66e9',
-          resultText: '2',
-          isWinner: true,
-          status: 'PLAYED',
-          name: 'SeatloN',
-        },
-      ],
-    },
-    {
-      id: 20503,
-      name: 'LB 1.2',
-      nextMatchId: 20506,
-      nextLooserMatchId: null,
-      tournamentRoundText: 'LB 1',
-      startTime: 'August 05, 2021',
-      state: 'SCORE_DONE',
-      participants: [
-        {
-          id: 'dd6c4bff-80da-449c-8bfa-24c835af013a',
-          resultText: '0',
-          isWinner: false,
-          status: 'PLAYED',
-          name: 'OmarDev',
-        },
-        {
-          id: 'fabb2218-49d6-41a2-874c-d6cd6928df70',
-          resultText: '2',
-          isWinner: true,
-          status: 'PLAYED',
-          name: 'jackieboi',
-        },
-      ],
-    },
-    {
-      id: 20504,
-      name: 'LB 2.1',
-      nextMatchId: 20507,
-      nextLooserMatchId: null,
-      tournamentRoundText: 'LB 2',
-      startTime: 'August 05, 2021',
-      state: 'SCORE_DONE',
-      participants: [
-        {
-          id: '3d1a5ddb-85b7-4724-b94d-8747454d66e9',
-          resultText: '2',
-          isWinner: true,
-          status: 'PLAYED',
-          name: 'SeatloN',
-        },
-        {
-          id: 'e1e48aad-5e29-41dc-b904-16f152a7ec74',
-          resultText: '0',
-          isWinner: false,
-          status: 'PLAYED',
-          name: 'spacefudg3',
-        },
-      ],
-    },
-    {
-      id: 20505,
-      name: 'LB 1.1',
-      nextMatchId: 20504,
-      nextLooserMatchId: null,
-      tournamentRoundText: 'LB 1',
-      startTime: 'August 05, 2021',
-      state: 'SCORE_DONE',
-      participants: [
-        {
-          id: 'e1e48aad-5e29-41dc-b904-16f152a7ec74',
-          resultText: '2',
-          isWinner: true,
-          status: 'PLAYED',
-          name: 'spacefudg3',
-        },
-        {
-          id: '12046e66-adbf-49d9-98c1-bed16d5ced29',
-          resultText: '0',
-          isWinner: false,
-          status: 'PLAYED',
-          name: 'Alex',
-        },
-      ],
-    },
-    {
-      id: 20506,
-      name: 'LB 2.2',
-      nextMatchId: 20507,
-      nextLooserMatchId: null,
-      tournamentRoundText: 'LB 2',
-      startTime: 'August 05, 2021',
-      state: 'SCORE_DONE',
-      participants: [
-        {
-          id: 'fabb2218-49d6-41a2-874c-d6cd6928df70',
-          resultText: '1',
-          isWinner: false,
-          status: 'PLAYED',
-          name: 'jackieboi',
-        },
-        {
-          id: '8cf422cd-a99d-4184-b2cd-70ee481f46b3',
-          resultText: '2',
-          isWinner: true,
-          status: 'PLAYED',
-          name: 'GlootOne',
-        },
-      ],
-    },
-    {
-      id: 20507,
-      name: 'LB 3.1',
-      nextMatchId: 20502,
-      nextLooserMatchId: null,
-      tournamentRoundText: 'LB 3',
-      startTime: 'August 05, 2021',
-      state: 'SCORE_DONE',
-      participants: [
-        {
-          id: '3d1a5ddb-85b7-4724-b94d-8747454d66e9',
-          resultText: '2',
-          isWinner: true,
-          status: 'PLAYED',
-          name: 'SeatloN',
-        },
-        {
-          id: '8cf422cd-a99d-4184-b2cd-70ee481f46b3',
-          resultText: '0',
-          isWinner: false,
-          status: 'PLAYED',
-          name: 'GlootOne',
-        },
-      ],
-    },
-  ],
+import { MatchEditorModal } from '../MatchEditorModal';
+import { ViewMatch } from '../ViewMatch';
+
+type Props = {
+  rounds: { matches: Match[] }[];
+  allowEdit?: boolean;
+  players?: Player[];
+  onSubmitEdit?: (roundIndex: number, data: Match) => void;
 };
 
-const DoubleElimination = () => {
-  // const matches = useMemo(() => {
-  //   const tmp: {
-  //     upper: MatchType[];
-  //     lower: MatchType[];
-  //   } = {
-  //     upper: [],
-  //     lower: [],
-  //   };
+const DoubleElimination = ({
+  rounds,
+  allowEdit,
+  players,
+  onSubmitEdit,
+}: Props) => {
+  const [activeRounds, setActiveRounds] = useState<{ matches: Match[] }[]>([]);
+  const [selectedMatch, setSelectedMatch] = useState<{
+    roundIndex: number;
+    data: Match;
+  }>();
 
-  //   rounds.forEach((round, index) => {
-  //     round.winnersBracket.forEach((match, matchIndex) => {
-  //       tmp.upper.push({
-  //         id: match.id,
-  //         nextMatchId:
-  //           rounds[index + 1]?.winnersBracket[Math.floor(matchIndex / 2)]?.id ||
-  //           '',
-  //         startTime: '',
-  //         state: 'WALK_OVER',
-  //         participants: match.players.map((player) => ({
-  //           id: player.id,
-  //           isWinner: false,
-  //           name: player.name,
-  //         })),
-  //       });
-  //     });
+  useEffect(() => {
+    const paramsRound = _.cloneDeep(rounds);
+    const initRounds: { matches: Match[] }[] = [];
+    if (paramsRound.length > 1) {
+      if (paramsRound[0].matches.length < paramsRound[1].matches.length * 2) {
+        const firstRound = paramsRound.shift();
+        const arr: any[] = _.range(paramsRound[0].matches.length * 2).map(
+          () => ({}),
+        );
 
-  //     round.losersBracket.forEach((match, matchIndex) => {
-  //       tmp.lower.push({
-  //         id: match.id,
-  //         nextMatchId:
-  //           rounds[index + 1]?.losersBracket[Math.floor(matchIndex / 2)]?.id ||
-  //           '',
-  //         startTime: '',
-  //         state: 'WALK_OVER',
-  //         participants: match.players.map((player) => ({
-  //           id: player.id,
-  //           isWinner: false,
-  //           name: player.name,
-  //         })),
-  //       });
-  //     });
-  //   });
+        firstRound?.matches.forEach((match) => {
+          const nextMatch = match?.winMatch!.split('-')[1];
+          if (!_.size(_.get(arr, [Number(nextMatch) * 2]))) {
+            _.set(arr, [Number(nextMatch) * 2], match);
+          } else {
+            _.set(arr, [Number(nextMatch) * 2 + 1], match);
+          }
+        });
+        initRounds.push({ matches: arr });
+      }
+    }
+    initRounds.push(...paramsRound);
+    setActiveRounds(initRounds);
+  }, [rounds]);
 
-  //   return tmp;
-  // }, [rounds]);
+  const renderMatches = useCallback(
+    (matches: Match[], roundIndex: number) => {
+      return matches.map((match) => {
+        if (!_.size(match)) {
+          return (
+            <div key={generateID()} className="w-full p-4">
+              <p className="h-7"></p>
+            </div>
+          );
+        }
+        return (
+          <div
+            key={match.id}
+            className="relative p-4 mb-4 bg-white rounded-lg shadow-md transition-all duration-300 hover:shadow-lg"
+            onClick={() => setSelectedMatch({ roundIndex, data: match })}
+            tabIndex={0}
+            role="button"
+          >
+            <div className="flex items-center h-7">
+              <span
+                className={`font-semibold w-5/12 ${match.winner === 1 ? 'text-green-600' : 'text-gray-700'}`}
+              >
+                {match.players[0]?.name || 'TBD'}
+              </span>
+              <span className="text-sm text-gray-500 w-2/12">vs</span>
+              <span
+                className={`font-semibold w-5/12 ${match.winner === 2 ? 'text-green-600' : 'text-gray-700'}`}
+              >
+                {match.players[1]?.name || 'TBD'}
+              </span>
+            </div>
+          </div>
+        );
+      });
+    },
+    [setSelectedMatch],
+  );
 
   return (
-    <DoubleEliminationBracket
-      matches={simpleDoubleFull as any}
-      matchComponent={MatchComponent}
-      // svgWrapper={({ children, ...props }) => (
-      //   <SVGViewer width={width ?? 500} height={height ?? 500} {...props}>
-      //     {children}
-      //   </SVGViewer>
-      // )}
-    />
+    <>
+      {selectedMatch ? (
+        <>
+          {allowEdit ? (
+            <MatchEditorModal
+              match={selectedMatch.data}
+              onClose={() => setSelectedMatch(undefined)}
+              allPlayers={players || []}
+              onSubmit={(match) => {
+                onSubmitEdit?.(selectedMatch.roundIndex, match);
+              }}
+            />
+          ) : (
+            <ViewMatch
+              match={selectedMatch.data}
+              onClose={() => setSelectedMatch(undefined)}
+            />
+          )}
+        </>
+      ) : null}
+      <div className="container mx-auto p-4 max-h-full h-full ">
+        <div className="flex flex-col md:flex-row  space-y-8 md:space-y-0 md:space-x-4">
+          {activeRounds.map((_round, index) => (
+            <div
+              key={index}
+              className="flex w-52 justify-center text-xl font-semibold bg-[#1e2235] text-white p-1 rounded-lg"
+            >
+              Round {index + 1}
+            </div>
+          ))}
+        </div>
+        <div className="w-full overflow-scroll h-full">
+          <div className="flex flex-row space-y-0 space-x-4">
+            {activeRounds.map((round, index) => (
+              <div key={index} className="flex flex-col justify-around w-52">
+                {renderMatches(round.matches, index)}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

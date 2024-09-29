@@ -68,16 +68,15 @@ function* getMatches(action: PayloadAction<{ tournament: string }>) {
 
 function* createMatch(
   action: PayloadAction<{
-    mathInfo: Partial<Match>;
+    matchInfo: Partial<Match>;
     onSuccess: (id: string) => void;
   }>,
 ) {
   try {
-    const { mathInfo, onSuccess } = action.payload;
-
+    const { matchInfo, onSuccess } = action.payload;
     const result: WithApiResult<{ id: string }> = yield backendService.post(
       '/match/create',
-      { mathInfo },
+      { matchInfo },
     );
     if (result.kind === 'ok') {
       onSuccess(result.data.id);
@@ -107,15 +106,47 @@ function* updateMatch(action: PayloadAction<Match>) {
   try {
     const match = action.payload;
 
-    const result: WithApiResult<Match> = yield backendService.post(
+    const result: WithApiResult<Match[]> = yield backendService.post(
       '/match/update',
-      { match },
+      { matches: [match] },
     );
     if (result.kind === 'ok') {
-      yield put(matchActions.fetchMatch(result.data));
+      yield put(matchActions.fetchMatch(result.data[0]));
       toast({
         title: 'Success',
         description: 'Match updated',
+      });
+    } else {
+      yield put(matchActions.updateHanding(false));
+      toast({
+        variant: 'destructive',
+        title: 'Failed',
+        description: formatError(result),
+      });
+    }
+  } catch (err) {
+    matchActions.updateHanding(false);
+    toast({
+      variant: 'destructive',
+      title: 'Failed',
+      description: formatError(err),
+    });
+  }
+}
+
+function* updateMatches(action: PayloadAction<Match[]>) {
+  try {
+    const matches = action.payload;
+
+    const result: WithApiResult<Match[]> = yield backendService.post(
+      '/match/update',
+      { matches },
+    );
+    if (result.kind === 'ok') {
+      yield put(matchActions.fetchMatches(result.data));
+      toast({
+        title: 'Success',
+        description: 'Matches updated',
       });
     } else {
       yield put(matchActions.updateHanding(false));
@@ -141,5 +172,6 @@ export default function* saga() {
     takeLatest(matchActions.getMatches.type, getMatches),
     takeLatest(matchActions.createMatch.type, createMatch),
     takeLatest(matchActions.updateMatch.type, updateMatch),
+    takeLatest(matchActions.updateMatches.type, updateMatches),
   ]);
 }

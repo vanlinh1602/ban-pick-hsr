@@ -13,10 +13,11 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
-    "@g-loot/react-tournament-brackets": "^1.0.31-rc",
     "@hookform/resolvers": "^3.9.0",
+    "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-checkbox": "^1.1.1",
+    "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-dropdown-menu": "^2.1.1",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-menubar": "^1.1.1",
@@ -31,6 +32,7 @@
     "apisauce": "^3.0.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "cmdk": "1.0.0",
     "date-fn": "^0.0.2",
     "date-fns": "^4.1.0",
     "framer-motion": "^11.5.6",
@@ -56,6 +58,7 @@
     "socket.io-client": "^4.7.5",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
+    "tournament-pairings": "^1.5.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {

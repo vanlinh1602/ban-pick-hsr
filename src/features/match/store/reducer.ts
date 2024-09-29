@@ -64,6 +64,9 @@ const slice = createSlice({
     updateMatch(state, _action: PayloadAction<Partial<Match>>) {
       state.handling = true;
     },
+    updateMatches(state, _action: PayloadAction<Match[]>) {
+      state.handling = true;
+    },
     modifyLiveActions(
       state,
       action: PayloadAction<{ action: string; data: any }>,

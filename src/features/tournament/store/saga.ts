@@ -1,5 +1,5 @@
 import { PayloadAction } from '@reduxjs/toolkit';
-import { all, put, select, takeLatest } from 'redux-saga/effects';
+import { all, put, takeLatest } from 'redux-saga/effects';
 
 import { toast } from '@/components/hooks/use-toast';
 import { Match } from '@/features/match/types';
@@ -8,7 +8,6 @@ import formatError from '@/utils/formatError';
 
 import { Tournament } from '../type';
 import { actions as tournamentActions } from './reducer';
-import { selectTournamentData } from './selectors';
 
 function* getTournaments() {
   try {
@@ -154,19 +153,19 @@ function* createTournament(action: PayloadAction<Partial<Tournament>>) {
 }
 
 function* saveBracket(
-  action: PayloadAction<{ id: string; rounds: Match[][] }>,
+  action: PayloadAction<{
+    tournament: Partial<Tournament>;
+    rounds: CustomObject<Match[]>[];
+  }>,
 ) {
   try {
-    const { id, rounds } = action.payload;
-    const tournament: Tournament = yield select((state) =>
-      selectTournamentData(state, id),
-    );
+    const { tournament, rounds } = action.payload;
+
     const result: WithApiResult<Tournament> = yield backendService.post(
       '/tournament/saveBracket',
       {
-        id,
         rounds,
-        players: tournament.players,
+        tournament,
       },
     );
     if (result.kind === 'ok') {

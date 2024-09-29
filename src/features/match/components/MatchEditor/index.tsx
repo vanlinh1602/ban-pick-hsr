@@ -98,7 +98,7 @@ const MatchEditor = ({ id }: Props) => {
     action: 'create' | 'update' | 'start',
   ) => {
     const matchInfo: Partial<MatchType> = {
-      players: matchData.players ?? [
+      players: matchData?.players ?? [
         {
           email: '',
           name: values.player1,
