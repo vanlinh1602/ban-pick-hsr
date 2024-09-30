@@ -1,9 +1,17 @@
 {
-  "name": "ban-pick-hsr",
+  "name": "tournament",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://vanlinh1602.github.io/ban-pick-hsr/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vanlinh1602/tournament.git"
+  },
+  "author": "vanlinh1602",
+  "bugs": {
+    "url": "https://github.com/vanlinh1602/tournament/issues"
+  },
+  "homepage": "https://github.com/vanlinh1602/tournament#readme",
   "scripts": {
     "dev": "REACT_APP_STAGE=development vite",
     "build": "tsc && vite build",
