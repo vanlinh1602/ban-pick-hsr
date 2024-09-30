@@ -33,7 +33,7 @@ const HomePage = () => {
 
   useEffect(() => {
     dispatch(actions.getTournaments());
-  }, [dispatch, actions]);
+  }, [dispatch]);
 
   useEffect(() => {
     setTournaments(Object.values(allTournaments));

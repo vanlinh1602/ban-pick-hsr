@@ -76,7 +76,7 @@ const TournamentDetails = () => {
       tournament.rounds?.forEach((round) => {
         const tmp: CustomObject<Match[]> = {};
         Object.entries(round).forEach(([key, value]) => {
-          tmp[key] = value.map((id: string) => tournamentMatches[id]);
+          tmp[key] = value.map((k: string) => tournamentMatches[k]);
         });
         matchsData.push(tmp);
       });

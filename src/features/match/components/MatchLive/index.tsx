@@ -38,7 +38,7 @@ const MatchLive = ({ id }: Props) => {
   const dispatch = useDispatch();
   const { actions: matchActions } = useMatchSlice();
 
-  const matchDetail = useSelector((state: any) => selectMatchData(state, id));
+  const matchDetail = useSelector((s: any) => selectMatchData(s, id));
   const characters = useSelector(selectCharacters);
   const [player, setPlayer] = useState<number>();
   const [gameSetup, setGameSetup] = useState<MatchGame>();
@@ -149,7 +149,7 @@ const MatchLive = ({ id }: Props) => {
       <div className="flex flex-col md:flex-row h-full bg-gray-100">
         {/* Left Column - Video Player */}
         <div className="md:w-2/3 p-4">
-          <VideoPlayer />
+          <VideoPlayer room={id} isPlayer={!!player} />
         </div>
         {/* Right Column - Match Information */}
         <div className="md:w-1/3 p-4">
@@ -268,7 +268,7 @@ const MatchLive = ({ id }: Props) => {
             ) : null}
           </div>
           {matchDetail.games?.map((game, index) => {
-            const player = matchDetail.players[game.player - 1];
+            const playerInfo = matchDetail.players[game.player - 1];
             return (
               <div
                 key={`game-${index}`}
@@ -282,16 +282,16 @@ const MatchLive = ({ id }: Props) => {
                     className={`text-lg font-semibold mb-2
                     ${game.player === 1 ? 'text-blue-600' : 'text-red-600'}`}
                   >
-                    {player.name}
+                    {playerInfo.name}
                   </h3>
                 </div>
                 <div className="flex justify-around items-center">
                   <div className="grid grid-cols-4 gap-5">
-                    {game.characters.map((char, index) => {
+                    {game.characters.map((char, charIndex) => {
                       const character = characters[char];
                       return (
                         <img
-                          key={index}
+                          key={charIndex}
                           src={character?.icon}
                           alt={character?.name}
                           className="w-10 h-10 rounded"

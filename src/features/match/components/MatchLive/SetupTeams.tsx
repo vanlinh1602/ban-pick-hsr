@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { z } from 'zod';
 
+import { SelectSearch } from '@/components';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -139,35 +140,19 @@ export const SetupTeams = ({
                     render={({ field }) => (
                       <div className="grid grid-cols-2 gap-5">
                         <FormItem>
-                          <Select
-                            onValueChange={(value) => {
+                          <SelectSearch
+                            options={activeChars.map((c) => ({
+                              id: c,
+                              name: characters[c].name,
+                              icon: characters[c].icon,
+                            }))}
+                            onChange={(value) => {
                               form.setValue(
                                 `slot-${i}.character` as any,
                                 value,
                               );
                             }}
-                            defaultValue={field.value.character}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a character" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {activeChars.map((char) => (
-                                <SelectItem key={char} value={char}>
-                                  <div className="flex items-center">
-                                    <img
-                                      src={characters[char].icon}
-                                      alt={characters[char].name}
-                                      className="h-8 w-8 mr-2 rounded-full"
-                                    />
-                                    {characters[char].name}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          />
                           <FormMessage />
                         </FormItem>
                         <FormItem>

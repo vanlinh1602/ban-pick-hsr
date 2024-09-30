@@ -81,7 +81,7 @@ const BracketTournament = () => {
       tournament.rounds?.forEach((round) => {
         const tmp: CustomObject<Match[]> = {};
         Object.entries(round).forEach(([key, value]) => {
-          tmp[key] = value.map((id: string) => matchInTour[id]);
+          tmp[key] = value.map((k) => matchInTour[k]);
         });
         matchsData.push(tmp);
       });
@@ -236,7 +236,7 @@ const BracketTournament = () => {
             className="bg-[#2a2f44] border-none text-white mb-4"
           />
           <ScrollArea className="flex-grow">
-            {cloneTournament?.players.map((player, index) => (
+            {cloneTournament?.players?.map((player, index) => (
               <div
                 key={player.id}
                 className="flex items-center justify-between p-2 hover:bg-[#2a2f44] rounded"

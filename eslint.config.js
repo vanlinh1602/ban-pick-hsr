@@ -1,6 +1,7 @@
 import { fixupConfigRules } from '@eslint/compat';
 import pluginJs from '@eslint/js';
 import pluginReactConfig from 'eslint-plugin-react/configs/recommended.js';
+import reactHooks from 'eslint-plugin-react-hooks';
 import simpleImportSortPlugin from 'eslint-plugin-simple-import-sort';
 import unusedImports from 'eslint-plugin-unused-imports';
 import globals from 'globals';
@@ -26,6 +27,7 @@ export default [
       ['@typescript-eslint']: tseslint.plugin,
       ['simple-import-sort']: simpleImportSortPlugin,
       ['unused-imports']: unusedImports,
+      ['react-hooks']: reactHooks,
     },
     rules: {
       semi: ['error', 'always'],
@@ -37,6 +39,8 @@ export default [
         { argsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-redeclare': 'error',
+      '@typescript-eslint/no-shadow': 'error',
       'unused-imports/no-unused-imports': 'error',
       'unused-imports/no-unused-vars': [
         'error',
@@ -45,6 +49,8 @@ export default [
         },
       ],
       'react/react-in-jsx-scope': 'off',
+      'react-hooks/rules-of-hooks': 'warn',
+      'object-shorthand': ['error', 'always'],
     },
   },
 ];

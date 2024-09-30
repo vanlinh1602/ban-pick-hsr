@@ -25,7 +25,7 @@ const MatchDetail = () => {
   const dispatch = useDispatch();
   const { actions } = useMatchSlice();
   const handling = useSelector(selectMatchHandling);
-  const matchData = useSelector((state: any) => selectMatchData(state, id!));
+  const matchData = useSelector((s: any) => selectMatchData(s, id!));
 
   useEffect(() => {
     if (id) {
