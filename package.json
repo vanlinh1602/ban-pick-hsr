@@ -49,6 +49,7 @@
     "less": "^4.2.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.441.0",
+    "mediasoup-client": "^3.7.17",
     "michos_api": "1.0.3",
     "nanoid": "^5.0.7",
     "react": "^18.2.0",

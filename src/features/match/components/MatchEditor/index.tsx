@@ -149,9 +149,9 @@ const MatchEditor = ({ id }: Props) => {
       matchInfo.status = 'ban-pick';
       dispatch(
         actions.createMatch({
-          matchInfo: matchInfo,
-          onSuccess: (id) => {
-            navigate(`/match/${id}`);
+          matchInfo,
+          onSuccess: (matchId) => {
+            navigate(`/match/${matchId}`);
           },
         }),
       );
@@ -355,10 +355,10 @@ const MatchEditor = ({ id }: Props) => {
       <div className="md:overflow-y-scroll md:no-scrollbar">
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="orderList">
-            {(provided) => (
+            {(providedParent) => (
               <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
+                {...providedParent.droppableProps}
+                ref={providedParent.innerRef}
                 className="bg-white rounded-lg shadow p-4"
               >
                 {order.map((item, index) => (
@@ -382,7 +382,6 @@ const MatchEditor = ({ id }: Props) => {
                           )}
                           {item.type.charAt(0).toUpperCase() +
                             item.type.slice(1)}{' '}
-                          {index + 1}
                           {item.player === 1 ? ' (Player 1)' : ' (Player 2)'}
                         </span>
                         <span className="text-gray-500 text-xs">
@@ -392,7 +391,7 @@ const MatchEditor = ({ id }: Props) => {
                     )}
                   </Draggable>
                 ))}
-                {provided.placeholder}
+                {providedParent.placeholder}
               </div>
             )}
           </Droppable>

@@ -32,6 +32,7 @@ export type Match = {
     email?: string;
   };
   matchSetup?: MatchSetUpInfo;
+  isLive?: boolean;
 };
 
 export type MatchState = {

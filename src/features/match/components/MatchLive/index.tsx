@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
-import { VideoPlayer } from '@/components';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,7 +24,9 @@ import { useMatchSlice } from '../../store';
 import { selectMatchData } from '../../store/selectors';
 import { MatchGame } from '../../types';
 import MatchUrlModal from '../MatchUrlModal';
+import { PlayerVideo } from './PlayerVideo';
 import { SetupTeams } from './SetupTeams';
+import { ViewerVideo } from './ViewerVideo';
 
 type Props = {
   id: string;
@@ -149,7 +150,11 @@ const MatchLive = ({ id }: Props) => {
       <div className="flex flex-col md:flex-row h-full bg-gray-100">
         {/* Left Column - Video Player */}
         <div className="md:w-2/3 p-4">
-          <VideoPlayer room={id} isPlayer={!!player} />
+          {player ? (
+            <PlayerVideo room={id} />
+          ) : (
+            <ViewerVideo room={id} isLive={matchDetail.isLive} />
+          )}
         </div>
         {/* Right Column - Match Information */}
         <div className="md:w-1/3 p-4">
