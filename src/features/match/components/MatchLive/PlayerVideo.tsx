@@ -69,96 +69,110 @@ export const PlayerVideo = ({ room }: Props) => {
 
   const ref = useRef<HTMLVideoElement>(null);
 
-  const handleLiveStream = () => {
+  const handleLiveStream = async () => {
     try {
-      navigator.mediaDevices
-        .getDisplayMedia({ video: true, audio: true })
-        .then((stream) => {
-          ref.current!.srcObject = stream;
-          ref.current!.muted = true;
-          // get rtpCapabilities from server
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true,
+      });
+
+      ref.current!.srcObject = stream;
+      ref.current!.muted = true;
+      // get rtpCapabilities from server
+      const { rtpCapabilities }: { rtpCapabilities: RtpCapabilities } =
+        await new Promise((resolve, reject) => {
+          try {
+            socket.emit('getRtpCapabilities', (data: any) => {
+              resolve(data);
+            });
+          } catch (error: any) {
+            reject(error);
+          }
+        });
+
+      // create device
+      const divice = new Device();
+      await divice.load({
+        routerRtpCapabilities: rtpCapabilities,
+      });
+
+      // create send transport
+      const { params }: any = await new Promise((resolve, reject) => {
+        try {
           socket.emit(
-            'getRtpCapabilities',
-            async ({
-              rtpCapabilities,
-            }: {
-              rtpCapabilities: RtpCapabilities;
-            }) => {
-              const divice = new Device();
-              await divice.load({
-                routerRtpCapabilities: rtpCapabilities,
-              });
-
-              // create send transport
-              socket.emit(
-                'createWebRtcTransport',
-                {
-                  player: true,
-                  room,
-                },
-                async ({ params }: any) => {
-                  if (params.error) {
-                    throw new Error(params.error);
-                  }
-
-                  const transport = await divice.createSendTransport(params);
-                  transport.on(
-                    'connect',
-                    ({ dtlsParameters }, callback, errback) => {
-                      try {
-                        socket.emit('transport-connect', {
-                          dtlsParameters,
-                          room,
-                        });
-                        callback();
-                      } catch (error: any) {
-                        errback(error);
-                      }
-                    },
-                  );
-
-                  transport.on('produce', (parameters, callback, errback) => {
-                    try {
-                      socket.emit(
-                        'transport-produce',
-                        {
-                          kind: parameters.kind,
-                          rtpParameters: parameters.rtpParameters,
-                          appData: parameters.appData,
-                          room,
-                        },
-                        ({ id }: any) => {
-                          callback({ id });
-                        },
-                      );
-                    } catch (error: any) {
-                      errback(error);
-                    }
-                  });
-
-                  const videoProducer = await transport.produce({
-                    ...produceParams,
-                    track: stream.getVideoTracks()[0],
-                  });
-
-                  videoProducer.on('transportclose', () => {
-                    transport.close();
-                    setIsLive(false);
-                  });
-                  videoProducer.on('trackended', () => {
-                    transport.close();
-                    setIsLive(false);
-                  });
-                  setIsLive(true);
-                  socket.emit('syncMatch', {
-                    room,
-                    match: { id: room, isLive: true },
-                  });
-                },
-              );
+            'createWebRtcTransport',
+            {
+              player: true,
+              room,
+            },
+            (data: any) => {
+              resolve(data);
             },
           );
-        });
+        } catch (error: any) {
+          reject(error);
+        }
+      });
+
+      if (params.error) {
+        throw new Error(params.error);
+      }
+
+      const transport = await divice.createSendTransport(params);
+      transport.on('connect', ({ dtlsParameters }, callback, errback) => {
+        try {
+          socket.emit('transport-connect', {
+            dtlsParameters,
+            room,
+          });
+          callback();
+        } catch (error: any) {
+          errback(error);
+        }
+      });
+
+      transport.on('produce', (parameters, callback, errback) => {
+        try {
+          socket.emit(
+            'transport-produce',
+            {
+              kind: parameters.kind,
+              rtpParameters: parameters.rtpParameters,
+              appData: parameters.appData,
+              room,
+            },
+            ({ id }: any) => {
+              callback({ id });
+            },
+          );
+        } catch (error: any) {
+          errback(error);
+        }
+      });
+
+      await Promise.all(
+        stream.getTracks().map(async (track) => {
+          const producer = await transport.produce({
+            track,
+            ...(track.kind === 'video' ? produceParams : {}),
+          });
+          producer.on('transportclose', () => {
+            transport.close();
+            setIsLive(false);
+          });
+          producer.on('trackended', () => {
+            transport.close();
+            setIsLive(false);
+          });
+        }),
+      );
+
+      // sync match status
+      setIsLive(true);
+      socket.emit('syncMatch', {
+        room,
+        match: { id: room, isLive: true },
+      });
     } catch (error: any) {
       toast({
         variant: 'destructive',

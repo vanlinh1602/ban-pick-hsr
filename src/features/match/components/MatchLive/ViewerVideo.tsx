@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-shadow */
 import { Device } from 'mediasoup-client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -48,63 +47,74 @@ export const ViewerVideo = ({ room, isLive }: Props) => {
 
   const ref = useRef<HTMLVideoElement>(null);
 
-  const handleViewStream = () => {
+  const handleViewStream = async () => {
     try {
-      socket.emit('getRtpCapabilities', async (data: any) => {
-        const device = new Device();
-        await device.load({ routerRtpCapabilities: data.rtpCapabilities });
-        socket.emit(
-          'createWebRtcTransport',
-          { room, viewerId },
-          ({ params }: any) => {
-            if (params.error) {
-              throw new Error(params.error);
-            }
-            const consumerTransport = device.createRecvTransport(params);
+      const { rtpCapabilities }: any = await new Promise((resolve) => {
+        socket.emit('getRtpCapabilities', async (data: any) => {
+          resolve(data);
+        });
+      });
 
-            consumerTransport.on(
-              'connect',
-              ({ dtlsParameters }, callback, errback) => {
-                try {
-                  socket.emit('transport-recv-connect', {
-                    dtlsParameters,
-                    room,
-                    viewerId,
-                  });
-                  callback();
-                } catch (error: any) {
-                  errback(error);
-                }
-              },
-            );
-
-            socket.emit(
-              'consume',
-              {
-                rtpCapabilities: device.rtpCapabilities,
-                room,
-                viewerId,
-              },
-              async ({ params }: any) => {
-                if (params.error) {
-                  throw new Error(params.error);
-                }
-
-                const consumer = await consumerTransport.consume({
-                  id: params.id,
-                  producerId: params.producerId,
-                  kind: params.kind,
-                  rtpParameters: params.rtpParameters,
-                });
-
-                const { track } = consumer;
-                setIsView(true);
-                ref.current!.srcObject = new MediaStream([track]);
-              },
-            );
-          },
+      const device = new Device();
+      await device.load({ routerRtpCapabilities: rtpCapabilities });
+      const { params }: any = await new Promise((resolve) => {
+        socket.emit('createWebRtcTransport', { room, viewerId }, (data: any) =>
+          resolve(data),
         );
       });
+      if (params.error) {
+        throw new Error(params.error);
+      }
+      const consumerTransport = device.createRecvTransport(params);
+
+      consumerTransport.on(
+        'connect',
+        ({ dtlsParameters }, callback, errback) => {
+          try {
+            socket.emit('transport-recv-connect', {
+              dtlsParameters,
+              room,
+              viewerId,
+            });
+            callback();
+          } catch (error: any) {
+            errback(error);
+          }
+        },
+      );
+
+      const streamParams: any = await new Promise((resolve) => {
+        socket.emit(
+          'consume',
+          {
+            rtpCapabilities: device.rtpCapabilities,
+            room,
+            viewerId,
+          },
+          (data: any) => resolve(data),
+        );
+      });
+
+      if (streamParams.error) {
+        throw new Error(params.error);
+      }
+
+      const tracks: MediaStreamTrack[] = [];
+
+      await Promise.all(
+        Object.values(streamParams).map(async (streamParam: any) => {
+          const consumer = await consumerTransport.consume({
+            id: streamParam.id,
+            producerId: streamParam.producerId,
+            kind: streamParam.kind,
+            rtpParameters: streamParam.rtpParameters,
+          });
+          tracks.push(consumer.track);
+        }),
+      );
+
+      setIsView(true);
+      ref.current!.srcObject = new MediaStream(tracks);
     } catch (error: any) {
       toast({
         variant: 'destructive',
