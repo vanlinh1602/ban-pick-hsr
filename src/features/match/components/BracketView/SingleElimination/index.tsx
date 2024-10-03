@@ -56,29 +56,26 @@ const SingleElimination = ({
     (matches: Match[], roundIndex: number) => {
       return matches.map((match) => {
         if (!_.size(match)) {
-          return (
-            <div key={generateID()} className="w-full p-4">
-              <p className="h-7"></p>
-            </div>
-          );
+          return <div key={generateID()} className="w-full p-4 h-32"></div>;
         }
         return (
           <div
             key={match.id}
-            className="relative p-4 mb-4 bg-white rounded-lg shadow-md transition-all duration-300 hover:shadow-lg"
+            className="overflow-hidden pt-4 pb-4"
             onClick={() => setSelectedMatch({ roundIndex, data: match })}
             tabIndex={0}
             role="button"
           >
-            <div className="flex items-center h-7">
+            <div className="p-4 flex items-center text-gray-500 rounded-t-lg bg-white w-56 h-12 border-b border-b-black border border-gray-400">
               <span
-                className={`font-semibold w-5/12 ${match.winner === 1 ? 'text-green-600' : 'text-gray-700'}`}
+                className={`font-semibold ${match.winner === 1 ? 'text-green-600' : 'text-gray-700'}`}
               >
                 {match.players[0]?.name || 'TBD'}
               </span>
-              <span className="text-sm text-gray-500 w-2/12">vs</span>
+            </div>
+            <div className="p-4 flex items-center text-gray-500 rounded-b-lg  bg-white w-56 h-12 shadow-md border border-gray-400">
               <span
-                className={`font-semibold w-5/12 ${match.winner === 2 ? 'text-green-600' : 'text-gray-700'}`}
+                className={`font-semibold ${match.winner === 2 ? 'text-green-600' : 'text-gray-700'}`}
               >
                 {match.players[1]?.name || 'TBD'}
               </span>
@@ -111,25 +108,61 @@ const SingleElimination = ({
           )}
         </>
       ) : null}
-      <div className="container mx-auto p-4 max-h-full h-full ">
-        <div className="flex flex-col md:flex-row  space-y-8 md:space-y-0 md:space-x-4">
+      <div className="mx-auto px-4 pb-4 mt-4 max-h-full h-full overflow-y-scroll ">
+        <div className="flex flex-col md:flex-row  space-y-8 md:space-y-0 md:space-x-20 sticky top-0 bg-white">
           {activeRounds.map((_round, index) => (
             <div
-              key={index}
-              className="flex w-52 justify-center text-xl font-semibold bg-[#1e2235] text-white p-1 rounded-lg"
+              key={`title-round-${index}`}
+              className="flex min-w-56 w-56 justify-center text-xl font-semibold bg-[#1e2235] text-white p-1 rounded-lg"
             >
               Round {index + 1}
             </div>
           ))}
         </div>
-        <div className="w-full overflow-scroll h-full">
-          <div className="flex flex-row space-y-0 space-x-4">
-            {activeRounds.map((round, index) => (
-              <div key={index} className="flex flex-col justify-around w-52">
-                {renderMatches(round.matches, index)}
+        <div className="flex flex-1">
+          {activeRounds.map((round, roundIndex) => (
+            <>
+              <div
+                key={`round-${roundIndex}`}
+                className="flex flex-col items-center justify-around"
+              >
+                {renderMatches(round.matches, roundIndex)}
               </div>
-            ))}
-          </div>
+              {roundIndex !== activeRounds.length - 1 && (
+                <div
+                  key={`line-${roundIndex}`}
+                  className="flex flex-col items-center justify-around min-w-20 w-20"
+                >
+                  {_.range(0, round.matches.length / 2).map((index) => {
+                    const hasMatch1 = _.size(round.matches[2 * index]);
+                    const hasMatch2 = _.size(round.matches[2 * index + 1]);
+                    return (
+                      <div
+                        key={`line-${roundIndex}-${index}`}
+                        style={{
+                          height: 128 * Math.pow(2, roundIndex),
+                        }}
+                        className="grid grid-cols-2"
+                      >
+                        <div
+                          className={`h-full w-10 ${hasMatch1 ? 'border-r-2 border-t-2' : ''}`}
+                        ></div>
+                        <div
+                          className={`h-full w-10  ${hasMatch1 ? 'border-b-2' : ''}`}
+                        ></div>
+                        <div
+                          className={`h-full w-10 ${hasMatch2 ? 'border-r-2 border-b-2' : ''}`}
+                        ></div>
+                        <div
+                          className={`h-full w-10 ${hasMatch2 ? 'border-t-2' : ''}`}
+                        ></div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          ))}
         </div>
       </div>
     </>

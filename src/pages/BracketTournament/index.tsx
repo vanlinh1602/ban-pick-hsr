@@ -1,4 +1,4 @@
-import { set } from 'lodash';
+import { cloneDeep, get, set } from 'lodash';
 import { MoreVertical } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { FaRegEdit, FaRegTrashAlt } from 'react-icons/fa';
@@ -199,7 +199,7 @@ const BracketTournament = () => {
                   <SelectContent>
                     <SelectGroup>
                       <SelectItem value="single">Single</SelectItem>
-                      <SelectItem value="double">Double</SelectItem>
+                      {/* <SelectItem value="double">Double</SelectItem> */}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -292,14 +292,43 @@ const BracketTournament = () => {
                 allowEdit
                 players={cloneTournament?.players || []}
                 onSubmitEdit={(roundIndex, data) => {
+                  const matchUpdate: CustomObject<Match> = {};
                   const newRounds = [...rounds];
                   const matchIndex = newRounds[roundIndex].matches.findIndex(
                     (m) => m.id === data.id,
                   );
                   set(newRounds, `${roundIndex}.matches.${matchIndex}`, data);
+                  matchUpdate[data.id] = data;
+                  if (data.winner) {
+                    if (data.winMatch) {
+                      const playerWin = get(data, ['players', data.winner - 1]);
+                      const [nextRoundIndex, nextMatchIndex] =
+                        data.winMatch.split('-');
+                      const nextMatch: Match = get(
+                        newRounds,
+                        [nextRoundIndex, 'matches', nextMatchIndex],
+                        {},
+                      );
+                      const nextRoundPlayers =
+                        cloneDeep(nextMatch.players) || [];
+                      nextRoundPlayers.push(playerWin);
+                      set(
+                        newRounds,
+                        `${nextRoundIndex}.matches.${nextMatchIndex}`,
+                        {
+                          ...nextMatch,
+                          players: nextRoundPlayers,
+                        },
+                      );
+                      matchUpdate[nextMatch.id] = {
+                        ...nextMatch,
+                        players: nextRoundPlayers,
+                      };
+                    }
+                  }
                   setRounds(newRounds);
                   if (matchInTour[data.id]) {
-                    setUpdateMatch((pre) => ({ ...pre, [data.id]: data }));
+                    setUpdateMatch((pre) => ({ ...pre, ...matchUpdate }));
                   }
                 }}
               />

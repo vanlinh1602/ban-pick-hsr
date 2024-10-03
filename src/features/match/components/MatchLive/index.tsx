@@ -87,7 +87,7 @@ const MatchLive = ({ id }: Props) => {
 
     const unAvailableCharacters: string[] = [];
     matchDetail?.matchSetup?.banPickStatus.forEach((status) => {
-      const character = characters[status.character!];
+      const character = characters[status.character!] || {};
       if (status.type === 'ban') {
         mathInfo.playerData[`player${status.player}`].bans.push(character!);
         unAvailableCharacters.push(character.id);

@@ -48,6 +48,7 @@ export const MatchEditorModal = ({
     player1: z.string().optional(),
     player2: z.string().optional(),
     date: z.date().optional(),
+    winner: z.string().optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -56,6 +57,7 @@ export const MatchEditorModal = ({
       date: match.date ? new Date(match.date) : new Date(),
       player1: match.players[0]?.id || '',
       player2: match.players[1]?.id || '',
+      winner: match.winner?.toString() || '',
     },
   });
 
@@ -74,6 +76,7 @@ export const MatchEditorModal = ({
       ...match,
       date: values.date?.getTime() || Date.now(),
       players: [player1!, player2!],
+      winner: values.winner ? parseInt(values.winner) : undefined,
     };
     onSubmit(matchUpdate);
     onClose();
@@ -172,6 +175,36 @@ export const MatchEditorModal = ({
                       <SelectContent>
                         {allPlayers.map((player) => (
                           <SelectItem key={player.id} value={player.id}>
+                            {player.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="winner"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Winner</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a players" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {match.players.map((player, index) => (
+                          <SelectItem
+                            key={player.id}
+                            value={(index + 1).toString()}
+                          >
                             {player.name}
                           </SelectItem>
                         ))}
