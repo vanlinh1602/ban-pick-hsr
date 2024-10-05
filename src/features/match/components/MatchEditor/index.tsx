@@ -171,12 +171,13 @@ const MatchEditor = ({ id }: Props) => {
 
   return (
     <div
+      id="match-editor"
       className="flex flex-col md:grid md:grid-cols-2 gap-4 overflow-y-scroll no-scrollbar"
       style={{
         height: 'calc(100vh - 220px)',
       }}
     >
-      <div className="bg-white rounded-lg shadow p-4">
+      <div id="match-details" className="bg-white rounded-lg shadow p-4">
         <Form {...form}>
           <form className="space-y-8">
             <h2 className="text-2xl font-bold">
@@ -347,6 +348,7 @@ const MatchEditor = ({ id }: Props) => {
             </>
           ) : (
             <Button
+              id="match-save"
               onClick={() => {
                 const values = form.getValues();
                 onSubmit(values, 'create');
@@ -357,7 +359,7 @@ const MatchEditor = ({ id }: Props) => {
           )}
         </div>
       </div>
-      <div className="md:overflow-y-scroll md:no-scrollbar">
+      <div id="match-players" className="md:overflow-y-scroll md:no-scrollbar">
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="orderList">
             {(providedParent) => (

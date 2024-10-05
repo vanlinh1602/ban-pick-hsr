@@ -86,6 +86,7 @@ const MenuBar = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-10">
             <div
+              id="home-header"
               onClick={() => navigate('/home')}
               className="text-base font-medium text-gray-500 hover:text-gray-900 cursor-pointer"
             >
@@ -99,6 +100,7 @@ const MenuBar = () => {
               </div>
             </div>
             <div
+              id="match-header"
               onClick={() => navigate('/match')}
               className="text-base font-medium text-gray-500 hover:text-gray-900 cursor-pointer"
             >
@@ -112,6 +114,7 @@ const MenuBar = () => {
               </div>
             </div>
             <div
+              id="config-header"
               onClick={() => navigate('/configs')}
               className="text-base font-medium text-gray-500 hover:text-gray-900 cursor-pointer"
             >
@@ -132,7 +135,11 @@ const MenuBar = () => {
             {userInfo?.id ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center">
+                  <Button
+                    id="login-button"
+                    variant="ghost"
+                    className="flex items-center"
+                  >
                     {userInfo?.avatar ? (
                       <Avatar>
                         <AvatarImage src={userInfo.avatar} alt="avatar" />
@@ -165,6 +172,7 @@ const MenuBar = () => {
               </DropdownMenu>
             ) : (
               <Button
+                id="login-button"
                 variant="ghost"
                 size="icon"
                 className="mr-2"

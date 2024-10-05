@@ -30,6 +30,7 @@ import { EditTournament } from '@/features/tournament/components';
 import { useTournamentSlice } from '@/features/tournament/store';
 import { selectTournamentData } from '@/features/tournament/store/selectors';
 import { selectUserInformation } from '@/features/user/store/selectors';
+import { startTutorial } from '@/lib/tutorial';
 import { translations } from '@/locales/translations';
 type TournamentData = {
   players: {
@@ -71,6 +72,17 @@ const TournamentDetails = () => {
       dispatch(tournamentActions.getTournament(id!));
     }
   }, []);
+
+  useEffect(() => {
+    const tutorial = JSON.parse(localStorage.getItem('tutorial') || '{}');
+    if (!tutorial.tournament && tournament) {
+      startTutorial('tournament')!.drive();
+      localStorage.setItem(
+        'tutorial',
+        JSON.stringify({ ...tutorial, tournament: true }),
+      );
+    }
+  }, [tournament]);
 
   useEffect(() => {
     if (tournament && Object.keys(tournamentMatches).length) {
@@ -493,12 +505,14 @@ const TournamentDetails = () => {
               <FaUsers className="mr-2 text-primary" />{' '}
               {t(translations.tournamentStructure)}
             </h2>
-            {userInfo?.email === tournament?.organizer?.id ? (
-              <FaRegEdit
-                className="text-xl text-primary mb-4"
-                onClick={() => navigator(`/tournament/${id}/edit`)}
-              />
-            ) : null}
+            <div id="setup-bracket">
+              {userInfo?.email === tournament?.organizer?.id ? (
+                <FaRegEdit
+                  className="text-xl text-primary mb-4"
+                  onClick={() => navigator(`/tournament/${id}/edit`)}
+                />
+              ) : null}
+            </div>
           </div>
           <div
             style={{

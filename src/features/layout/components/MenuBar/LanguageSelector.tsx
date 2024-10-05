@@ -44,6 +44,7 @@ export default function LanguageSelector() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          id="language-selector"
           variant="outline"
           role="combobox"
           aria-expanded={open}

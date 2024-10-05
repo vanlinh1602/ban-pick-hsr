@@ -46,6 +46,7 @@ import {
 import { Player, Tournament } from '@/features/tournament/type';
 import { selectUserInformation } from '@/features/user/store/selectors';
 import { BracketManager } from '@/lib/bracket';
+import { startTutorial } from '@/lib/tutorial';
 import { translations } from '@/locales/translations';
 
 const BracketTournament = () => {
@@ -78,6 +79,17 @@ const BracketTournament = () => {
     }
     if (!tournament) {
       dispatch(actions.getTournament(id!));
+    }
+  }, []);
+
+  useEffect(() => {
+    const tutorial = JSON.parse(localStorage.getItem('tutorial') || '{}');
+    if (!tutorial.bracket) {
+      startTutorial('bracket')!.drive();
+      localStorage.setItem(
+        'tutorial',
+        JSON.stringify({ ...tutorial, bracket: true }),
+      );
     }
   }, []);
 
@@ -200,13 +212,16 @@ const BracketTournament = () => {
         style={{ height: window.innerHeight - 72 }}
       >
         {/* Sidebar */}
-        <div className="w-64 bg-[#1e2235] text-white p-4 flex flex-col">
+        <div
+          id="bracket-config"
+          className="w-64 bg-[#1e2235] text-white p-4 flex flex-col"
+        >
           {!tournament?.status || tournament.status === 'set-up' ? (
             <>
               <h2 className="text-sm font-semibold text-start mb-2">
                 {t(translations.eliminationType)}
               </h2>
-              <div className="flex gap-2 mb-2 items-center">
+              <div id="elimation-type" className="flex gap-2 mb-2 items-center">
                 <Select
                   onValueChange={(v) => setSelecteType(v)}
                   value={selecteType}
@@ -243,6 +258,7 @@ const BracketTournament = () => {
             </h2>
             {!tournament?.status || tournament.status === 'set-up' ? (
               <Button
+                id="add-player"
                 variant="outline"
                 size="sm"
                 className="text-black"
@@ -304,6 +320,7 @@ const BracketTournament = () => {
             ))}
           </ScrollArea>
           <Button
+            id="save-bracket"
             variant="outline"
             className="mt-4 text-gray-600 border-dashed border-white/20"
             onClick={handleSave}
@@ -314,7 +331,7 @@ const BracketTournament = () => {
 
         {/* Main content */}
         {rounds.length ? (
-          <div className={'flex-1 h-full overflow-hidden'}>
+          <div id="bracket-view" className={'flex-1 h-full overflow-hidden'}>
             {selecteType === 'single' ? (
               <SingleElimination
                 rounds={rounds as { matches: Match[] }[]}

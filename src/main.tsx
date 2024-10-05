@@ -2,6 +2,7 @@ import './index.css';
 import './locales/i18n';
 import 'remixicon/fonts/remixicon.css';
 import './services/firebase.ts';
+import 'driver.js/dist/driver.css';
 
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';

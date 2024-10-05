@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 
 import { BanPickCard } from '@/components';
 import { selectCharacters } from '@/features/catalogs/store/selectors';
+import { startTutorial } from '@/lib/tutorial';
 import { translations } from '@/locales/translations';
 
 import { selectLiveActions, selectMatchData } from '../../store/selectors';
@@ -26,6 +27,17 @@ const BanPickViewer = ({ id }: Props) => {
   const liveActions = useSelector(selectLiveActions);
   const [showModal, setShowModal] = useState(false);
   const [state, setState] = useState<string>();
+
+  useEffect(() => {
+    const tutorial = JSON.parse(localStorage.getItem('tutorial') || '{}');
+    if (!tutorial.matchViewer) {
+      startTutorial('match-viewer')!.drive();
+      localStorage.setItem(
+        'tutorial',
+        JSON.stringify({ ...tutorial, matchViewer: true }),
+      );
+    }
+  }, []);
 
   const players = useMemo(() => {
     const tmp: CustomObject<{
@@ -60,24 +72,23 @@ const BanPickViewer = ({ id }: Props) => {
     return [tmp.player1, tmp.player2];
   }, [matchData]);
 
-  useEffect(() => {
-    if (liveActions?.banPick) {
-      setState(liveActions.banPick.key);
-    }
-  }, [liveActions?.banPick]);
-
   return (
     <div>
       {showModal ? (
         <MatchUrlModal match={matchData} onClose={() => setShowModal(false)} />
       ) : null}
-      <h2
-        className=" font-semibold text-blue-400 underline cursor-pointer"
+      <div
+        className="font-semibold text-blue-400 underline cursor-pointer w-fit-content mx-auto mt-4"
         onClick={() => setShowModal(true)}
       >
-        {t(translations.notify.clickHereToGetLink)}
-      </h2>
-      <div className="flex flex-col md:flex-row justify-center items-stretch bg-gray-100 p-4 pt-0">
+        <div id="match-get-url" className="flex justify-center">
+          <span>{t(translations.notify.clickHereToGetLink)}</span>
+        </div>
+      </div>
+      <div
+        id="match-live"
+        className="flex flex-col md:flex-row justify-center items-stretch bg-gray-100 p-4 pt-0"
+      >
         {players.map((player, index) => (
           <div
             key={index}

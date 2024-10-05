@@ -237,9 +237,20 @@ export const PlayerVideo = ({ room }: Props) => {
           </button>
         </div>
         {isLive && (
-          <div className="absolute top-4 left-4 bg-red-600 text-white px-2 py-1 rounded-md text-sm font-semibold">
-            LIVE
-          </div>
+          <>
+            <div className="absolute top-4 left-4 bg-red-600 text-white px-2 py-1 rounded-md text-sm font-semibold">
+              LIVE
+            </div>
+            <div
+              className="cursor-pointer absolute top-4 left-16 bg-primary-foreground text-black px-2 py-1 rounded-md text-sm font-semibold"
+              onClick={() => {
+                setIsLive(false);
+                transportSave?.close();
+              }}
+            >
+              STOP LIVE
+            </div>
+          </>
         )}
       </>
       {!isLive ? (

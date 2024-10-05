@@ -19,6 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { selectCharacters } from '@/features/catalogs/store/selectors';
 import type { Character } from '@/features/catalogs/types';
+import { startTutorial } from '@/lib/tutorial';
 import { translations } from '@/locales/translations';
 import { socket } from '@/services/socket';
 
@@ -48,6 +49,17 @@ const MatchLive = ({ id }: Props) => {
   const [gameSetup, setGameSetup] = useState<MatchGame>();
   const [showModal, setShowModal] = useState(false);
   const [showSetup, setShowSetup] = useState(false);
+
+  useEffect(() => {
+    const tutorial = JSON.parse(localStorage.getItem('tutorial') || '{}');
+    if (matchDetail && !tutorial.matchLiveSteam) {
+      startTutorial('match-live-stream')!.drive();
+      localStorage.setItem(
+        'tutorial',
+        JSON.stringify({ ...tutorial, matchLiveSteam: true }),
+      );
+    }
+  }, [matchDetail]);
 
   useEffect(() => {
     const params = new URLSearchParams(search);
@@ -150,9 +162,9 @@ const MatchLive = ({ id }: Props) => {
           onClose={() => setShowSetup(false)}
         />
       ) : null}
-      <div className="flex flex-col md:flex-row h-full bg-gray-100">
+      <div className="flex flex-col md:flex-row h-full bg-gray-100 min-h-lvh">
         {/* Left Column - Video Player */}
-        <div className="md:w-2/3 p-4">
+        <div id="match-live-stream" className="md:w-2/3 p-4">
           {matchDetail?.games?.length && player && activeTurn !== player ? (
             <PlayerVideo room={id} />
           ) : (
@@ -161,10 +173,14 @@ const MatchLive = ({ id }: Props) => {
         </div>
         {/* Right Column - Match Information */}
         <div className="md:w-1/3 p-4">
-          <div className="bg-white rounded-lg shadow-md p-6 mb-2">
+          <div
+            id="match-live-details"
+            className="bg-white rounded-lg shadow-md p-6 mb-2"
+          >
             <h3 className="text-2xl text-gray-800 mb-2 font-bold flex justify-center items-center">
               {t(translations.matchResult)}
               <FaInfoCircle
+                id="match-live-url"
                 className="inline-block text-blue-700 text-lg ml-2"
                 onClick={() =>
                   setShowModal((prev) => {
@@ -247,7 +263,6 @@ const MatchLive = ({ id }: Props) => {
               </div>
             </div>
           </div>
-
           <div className="text-end text-blue-600 font-semibold cursor-pointer mb-2">
             {activeTurn === player ? (
               <div className="space-x-2">
@@ -283,46 +298,50 @@ const MatchLive = ({ id }: Props) => {
               </div>
             ) : null}
           </div>
-          {matchDetail.games?.map((game, index) => {
-            const playerInfo = matchDetail.players[game.player - 1];
-            return (
-              <div
-                key={`game-${index}`}
-                className="bg-white rounded-lg shadow-md p-6 mb-2"
-              >
-                <div className="flex justify-between border-b-2 ">
-                  <h3 className="text-xl font-semibold mb-2 text-gray-800">
-                    Game {index + 1}
-                  </h3>
-                  <h3
-                    className={`text-lg font-semibold mb-2
+          <div id="match-games">
+            {matchDetail.games?.map((game, index) => {
+              const playerInfo = matchDetail.players[game.player - 1];
+              return (
+                <div
+                  key={`game-${index}`}
+                  className="bg-white rounded-lg shadow-md p-6 mb-2"
+                >
+                  <div className="flex justify-between border-b-2 ">
+                    <h3 className="text-xl font-semibold mb-2 text-gray-800">
+                      Game {index + 1}
+                    </h3>
+                    <h3
+                      className={`text-lg font-semibold mb-2
                     ${game.player === 1 ? 'text-blue-600' : 'text-red-600'}`}
-                  >
-                    {playerInfo.name}
-                  </h3>
-                </div>
-                <div className="flex justify-around items-center">
-                  <div className="grid grid-cols-4 gap-5">
-                    {game.characters.map((char, charIndex) => {
-                      const character = characters[char];
-                      return (
-                        <img
-                          key={charIndex}
-                          src={character?.icon}
-                          alt={character?.name}
-                          className="w-10 h-10 rounded"
-                        />
-                      );
-                    })}
+                    >
+                      {playerInfo.name}
+                    </h3>
                   </div>
-                  <div>
-                    <p className="font-semibold text-red-600 text-xl">Point</p>
-                    <p className="text-xl font-bold">{game.points}</p>
+                  <div className="flex justify-around items-center">
+                    <div className="grid grid-cols-4 gap-5">
+                      {game.characters.map((char, charIndex) => {
+                        const character = characters[char];
+                        return (
+                          <img
+                            key={charIndex}
+                            src={character?.icon}
+                            alt={character?.name}
+                            className="w-10 h-10 rounded"
+                          />
+                        );
+                      })}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-red-600 text-xl">
+                        Point
+                      </p>
+                      <p className="text-xl font-bold">{game.points}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </>

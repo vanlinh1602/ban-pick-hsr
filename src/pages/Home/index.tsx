@@ -22,6 +22,7 @@ import {
 } from '@/features/tournament/store/selectors';
 import { Tournament } from '@/features/tournament/type';
 import { selectUserInformation } from '@/features/user/store/selectors';
+import { startTutorial } from '@/lib/tutorial';
 import { translations } from '@/locales/translations';
 
 import { Filter } from './Filter';
@@ -47,6 +48,17 @@ const HomePage = () => {
   useEffect(() => {
     setTournaments(Object.values(allTournaments));
   }, [allTournaments]);
+
+  useEffect(() => {
+    const tutorial = JSON.parse(localStorage.getItem('tutorial') || '{}');
+    if (!tutorial.home) {
+      startTutorial('home')!.drive();
+      localStorage.setItem(
+        'tutorial',
+        JSON.stringify({ ...tutorial, home: true }),
+      );
+    }
+  }, []);
 
   const handleCreateTournament = () => {
     if (!userInfo?.id) {
@@ -115,6 +127,7 @@ const HomePage = () => {
         </h1>
         <div className="flex justify-between mb-6">
           <Button
+            id="create-tournament"
             onClick={handleCreateTournament}
             className="text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center"
           >
@@ -139,7 +152,10 @@ const HomePage = () => {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div
+        id="home-content"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
         {tournaments.map((tournament) => {
           let status = t(translations.tournament.status.upcoming);
           let statusColor = 'text-blue-500';
