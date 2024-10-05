@@ -169,11 +169,11 @@ function* saveBracket(
       },
     );
     if (result.kind === 'ok') {
-      const tournament = result.data;
+      const tournamentData = result.data;
       yield put(
         tournamentActions.modifyTournament({
-          path: [tournament.id],
-          data: tournament,
+          path: [tournamentData.id],
+          data: tournamentData,
         }),
       );
       toast({

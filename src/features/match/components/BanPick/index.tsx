@@ -1,11 +1,13 @@
 import _ from 'lodash';
 import { Grid2X2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FaCheck, FaUser } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -19,6 +21,7 @@ import {
   selectFilterCharacter,
 } from '@/features/catalogs/store/selectors';
 import type { Character } from '@/features/catalogs/types';
+import { translations } from '@/locales/translations';
 import { socket } from '@/services/socket';
 
 import { useMatchSlice } from '../../store';
@@ -34,14 +37,15 @@ type Props = {
   id: string;
 };
 
-const BanPick = ({ id }: Props) => {
+const BanPick = ({ id: matchID }: Props) => {
   const location = useLocation();
   const { state, search } = location;
+  const { t } = useTranslation();
 
   const dispatch = useDispatch();
   const { actions } = useMatchSlice();
 
-  const matchData = useSelector((state: any) => selectMatchData(state, id));
+  const matchData = useSelector((s: any) => selectMatchData(s, matchID));
   const characters = useSelector(selectCharacters);
   const filterCharacter = useSelector(selectFilterCharacter);
   const liveActions = useSelector(selectLiveActions);
@@ -147,21 +151,21 @@ const BanPick = ({ id }: Props) => {
 
     dispatch(
       actions.modifyMatch({
-        id,
+        id: matchID,
         patch: ['matchSetup', 'banPickStatus'],
         data: banPickStatus,
       }),
     );
     const matchUpdate = _.cloneDeep(matchData);
     _.set(matchUpdate, ['matchSetup', 'banPickStatus'], banPickStatus);
-    socket.emit('syncMatch', { match: matchUpdate, room: id });
+    socket.emit('syncMatch', { match: matchUpdate, room: matchID });
     setSelectCharacter(undefined);
   };
 
   const handleStartGame = () => {
     const match = _.cloneDeep(matchData);
     match.status = 'playing';
-    socket.emit('syncMatch', { match, room: id });
+    socket.emit('syncMatch', { match, room: matchID });
     dispatch(actions.updateMatch(match));
   };
 
@@ -178,11 +182,11 @@ const BanPick = ({ id }: Props) => {
         onClick={() => {
           setSelectCharacter(character);
           socket.emit('syncUserAction', {
-            room: id,
+            room: matchID,
             action: 'banPick',
             data: {
               character: character.id,
-              player: player,
+              player,
               type: activeTurn.type,
               key: activeTurn.key,
             },
@@ -239,7 +243,7 @@ const BanPick = ({ id }: Props) => {
         </div>
         <span className="mt-2 p-1 text-center">{playerInfo.name}</span>
         <div className="mt-4">
-          <h3 className="font-bold">Bans:</h3>
+          <h3 className="font-bold">{t(translations.ban)}:</h3>
           <div className="flex space-x-2 mt-1">
             {playerMatchData.bans.map((ban) => {
               const char = characters[ban];
@@ -255,7 +259,7 @@ const BanPick = ({ id }: Props) => {
           </div>
         </div>
         <div className="mt-4">
-          <h3 className="font-bold">Picks:</h3>
+          <h3 className="font-bold">{t(translations.pick)}:</h3>
           <div className="flex space-x-2 mt-1">
             {playerMatchData.picks.map((pick) => {
               const char = characters[pick];
@@ -296,7 +300,9 @@ const BanPick = ({ id }: Props) => {
             <div className="flex-1 mx-8 ">
               <div className="flex mb-4 justify-around">
                 <div className="flex items-center">
-                  <span className="mr-2 text-sm font-bold">Path</span>
+                  <span className="mr-2 text-sm font-bold">
+                    {t(translations.paths)}
+                  </span>
                   <Select
                     defaultValue="all"
                     onValueChange={(value) =>
@@ -310,7 +316,7 @@ const BanPick = ({ id }: Props) => {
                       <SelectItem value="all">
                         <div className="flex space-x-2 mt-1 ">
                           <Grid2X2 className="w-5 h-5 rounded-full " />
-                          <div>All</div>
+                          <div>{t(translations.all)}</div>
                         </div>
                       </SelectItem>
                       {filterCharacter.character_paths.values.map((path) => (
@@ -330,7 +336,9 @@ const BanPick = ({ id }: Props) => {
                   </Select>
                 </div>
                 <div className="flex items-center">
-                  <span className="mr-2 text-sm font-bold">Combat Type</span>
+                  <span className="mr-2 text-sm font-bold">
+                    {t(translations.combatType)}
+                  </span>
                   <Select
                     defaultValue="all"
                     onValueChange={(value) =>
@@ -344,7 +352,7 @@ const BanPick = ({ id }: Props) => {
                       <SelectItem value="all">
                         <div className="flex space-x-2 mt-1 ">
                           <Grid2X2 className="w-5 h-5 rounded-full " />
-                          <div>All</div>
+                          <div>{t(translations.all)}</div>
                         </div>
                       </SelectItem>
                       {filterCharacter.character_combat_type.values.map(
@@ -366,9 +374,11 @@ const BanPick = ({ id }: Props) => {
                   </Select>
                 </div>
                 <div className="flex items-center">
-                  <span className="mr-2 text-sm font-bold">Search</span>
+                  <span className="mr-2 text-sm font-bold">
+                    {t(translations.actions.search)}
+                  </span>
                   <Input
-                    placeholder={'Name'}
+                    placeholder={`${t(translations.actions.search)}...`}
                     onChange={(e) =>
                       setFilter((pre) => ({ ...pre, name: e.target.value }))
                     }
@@ -383,24 +393,24 @@ const BanPick = ({ id }: Props) => {
               </div>
               {player && (
                 <div className="mt-1 flex justify-center space-x-4">
-                  <button
+                  <Button
                     onClick={handleConfirm}
-                    className={`px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-300 ${
+                    className={`px-4 py-2 transition-colors duration-300 ${
                       !selectCharacter ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                     disabled={!selectCharacter || player !== activeTurn.player}
                   >
-                    <FaCheck className="inline-block mr-2" /> Confirm
-                  </button>
+                    <FaCheck className="inline-block mr-2" />{' '}
+                    {t(translations.actions.submit)}
+                  </Button>
                   {!activeTurn.player && (
-                    <button
+                    <Button
+                      variant="destructive"
                       onClick={handleStartGame}
-                      className={
-                        'px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-800 transition-colors duration-300 '
-                      }
+                      className={'px-4 py-2 transition-colors duration-300 '}
                     >
-                      Start Game
-                    </button>
+                      {t(translations.actions.startMatch)}
+                    </Button>
                   )}
                 </div>
               )}

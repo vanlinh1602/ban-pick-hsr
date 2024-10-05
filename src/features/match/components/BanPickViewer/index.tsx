@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FaUserCircle } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 
 import { BanPickCard } from '@/components';
 import { selectCharacters } from '@/features/catalogs/store/selectors';
+import { translations } from '@/locales/translations';
 
 import { selectLiveActions, selectMatchData } from '../../store/selectors';
 import MatchUrlModal from '../MatchUrlModal';
@@ -18,6 +20,7 @@ type BanPickData = {
   image: string;
 };
 const BanPickViewer = ({ id }: Props) => {
+  const { t } = useTranslation();
   const matchData = useSelector((state: any) => selectMatchData(state, id!));
   const characters = useSelector(selectCharacters);
   const liveActions = useSelector(selectLiveActions);
@@ -72,7 +75,7 @@ const BanPickViewer = ({ id }: Props) => {
         className=" font-semibold text-blue-400 underline cursor-pointer"
         onClick={() => setShowModal(true)}
       >
-        Click here to get the link to share this match
+        {t(translations.notify.clickHereToGetLink)}
       </h2>
       <div className="flex flex-col md:flex-row justify-center items-stretch bg-gray-100 p-4 pt-0">
         {players.map((player, index) => (
@@ -80,16 +83,18 @@ const BanPickViewer = ({ id }: Props) => {
             key={index}
             className="flex-1 max-w-md mx-2 my-4 bg-white rounded-lg shadow-lg overflow-hidden"
           >
-            <div className="bg-blue-600 text-white p-4 flex items-center">
+            <div className="bg-primary text-white p-4 flex items-center">
               <FaUserCircle className="text-2xl mr-2" />
               <h2 className="text-xl font-bold">
                 {matchData?.players[index]?.name}
               </h2>
             </div>
             <div className="p-4">
-              <h3 className="text-lg font-semibold mb-2">Banned Characters</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                {t(translations.bandedCharacter)}
+              </h3>
               <div className="grid grid-cols-3 gap-2 mb-4 h-40 w-full">
-                {player.ban.map((ban, index) => {
+                {player.ban.map((ban, charIndex) => {
                   let info = ban;
                   if (ban.id === liveActions?.banPick?.key) {
                     const char = characters[liveActions.banPick.character];
@@ -101,7 +106,7 @@ const BanPickViewer = ({ id }: Props) => {
                   }
                   return (
                     <BanPickCard
-                      key={index}
+                      key={charIndex}
                       state={state === ban.id ? 'banning' : 'idle'}
                       info={info}
                     />
@@ -109,7 +114,9 @@ const BanPickViewer = ({ id }: Props) => {
                 })}
               </div>
 
-              <h3 className="text-lg font-semibold mb-2">Selected Character</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                {t(translations.pickedCharacter)}
+              </h3>
               <div className="grid grid-cols-3 gap-2 mb-4">
                 {player.pick.map((pick, charIndex) => {
                   let info = pick;

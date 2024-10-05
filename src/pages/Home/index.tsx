@@ -118,7 +118,7 @@ const HomePage = () => {
             onClick={handleCreateTournament}
             className="text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center"
           >
-            <FaPlus className="mr-2" /> {t(translations.actions.create)}
+            <FaPlus className="mr-2" /> {t(translations.actions.createNew)}
           </Button>
           <div className="relative">
             <Button

@@ -1,9 +1,11 @@
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   signInWithEmailAndPassword,
+  signInWithPopup,
 } from 'firebase/auth';
-import { Facebook } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -25,10 +27,12 @@ import {
   selectUserHandling,
   selectUserInformation,
 } from '@/features/user/store/selectors';
+import { translations } from '@/locales/translations';
 import { auth } from '@/services/firebase';
 import formatError from '@/utils/formatError';
 
 export default function Login() {
+  const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
   const { state } = useLocation();
 
@@ -72,12 +76,32 @@ export default function Login() {
     }
   };
 
+  const handleSocialLogin = async () => {
+    setHandling(true);
+    try {
+      const providerInstance = new GoogleAuthProvider();
+      await signInWithPopup(auth, providerInstance);
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: formatError(error),
+      });
+    } finally {
+      setHandling(false);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       {handling || userHandling ? <Waiting /> : null}
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>{isLogin ? 'Login' : 'Register'}</CardTitle>
+          <CardTitle>
+            {isLogin
+              ? t(translations.actions.logIn)
+              : t(translations.actions.register)}
+          </CardTitle>
           <CardDescription>
             {isLogin
               ? 'Enter your credentials to access your account'
@@ -139,7 +163,11 @@ export default function Login() {
             </TabsContent>
             <TabsContent value="social">
               <div className="space-y-4">
-                <Button variant="outline" className="w-full">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => handleSocialLogin()}
+                >
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
@@ -161,10 +189,10 @@ export default function Login() {
                   </svg>
                   Continue with Google
                 </Button>
-                <Button variant="outline" className="w-full">
+                {/* <Button variant="outline" className="w-full">
                   <Facebook className="w-5 h-5 mr-2" />
                   Continue with Facebook
-                </Button>
+                </Button> */}
               </div>
             </TabsContent>
           </Tabs>

@@ -1,6 +1,7 @@
 import { Device } from 'mediasoup-client';
 import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
-import { useRef, useState } from 'react';
+import { AppData, Transport } from 'mediasoup-client/lib/types';
+import { useEffect, useRef, useState } from 'react';
 import {
   FaExpand,
   FaPause,
@@ -47,6 +48,7 @@ export const PlayerVideo = ({ room }: Props) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [transportSave, setTransportSave] = useState<Transport<AppData>>();
 
   const handlePlayPause = () => {
     if (ref.current!.paused) {
@@ -169,6 +171,7 @@ export const PlayerVideo = ({ room }: Props) => {
 
       // sync match status
       setIsLive(true);
+      setTransportSave(transport);
       socket.emit('syncMatch', {
         room,
         match: { id: room, isLive: true },
@@ -181,6 +184,14 @@ export const PlayerVideo = ({ room }: Props) => {
       });
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (transportSave) {
+        transportSave.close();
+      }
+    };
+  }, [transportSave]);
 
   return (
     <div className="relative w-full h-0 pb-[56.25%] bg-black rounded-lg overflow-hidden">

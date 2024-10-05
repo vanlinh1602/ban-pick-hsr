@@ -1,16 +1,127 @@
 {
-  "common": {
+  "appName": "HSR Tournament",
+  "pages": {
     "home": "Home",
-    "or": "Or"
+    "config": "Configuration",
+    "match": "Match",
+    "tournament": "Tournament",
+    "pointsAdustment": "Points Adjustment"
   },
-  "notFoundPage": {
-    "subTitle": "Page not found"
+
+  "actions": {
+    "update": "Update",
+    "view": "View",
+    "create": "Create",
+    "createNew": "Create New",
+    "filter": "Filter",
+    "viewDetail": "View Detail",
+    "select": "Select",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "save": "Save",
+    "add": "Add",
+    "delete": "Delete",
+    "search": "Search",
+    "back": "Back",
+    "start": "Start",
+    "createMatch": "Create Match",
+    "joinMatch": "Join Match",
+    "sort": "Sort",
+    "clear": "Clear",
+    "selectAll": "Select All",
+    "close": "Close",
+    "startMatch": "Start Match",
+    "logIn": "Log In",
+    "logOut": "Log Out",
+    "register": "Register"
   },
-  "errorBoundaryPage": {
-    "oops": "Oops! Something went wrong"
+
+  "tournament": {
+    "status": {
+      "upcoming": "Upcoming",
+      "inProgress": "In Progress",
+      "completed": "Completed"
+    }
   },
-  "loginPage": {
-    "signIn": "Sign in",
-    "signinWithGoogle": "Sign in with Google"
-  }
+
+  "notify": {
+    "noUpcomingMatches": "No upcoming matches",
+    "noCompletedMatches": "No completed matches",
+    "playerExist": "Player already exists",
+    "dragToReorder": "Drag to reorder",
+    "inputMatchId": "Enter match ID",
+    "inputPlayerId": "Enter player ID",
+    "noResult": "No result",
+    "cannotUndo": "This action cannot be undone",
+    "sendGameSetup": "It will send the team setup information to other players",
+    "youSure": "Are you sure?",
+    "unknown": "Unknown",
+    "clickHereToGetLink": "Click here to get match link"
+  },
+  "errors": {
+    "error": "Error",
+    "requireLogin": "Please log in to continue",
+    "unAuthorized": "You do not have permission to access this page"
+  },
+  "matchStatus": {
+    "set-up": "Set-up",
+    "ban-pick": "Ban-pick",
+    "playing": "Playing",
+    "finished": "Finished"
+  },
+  "all": "All",
+  "name": "Name",
+  "total": "Total",
+  "descriptions": "Descriptions",
+  "organizer": "Organizer",
+  "date": "Date",
+  "startTime": "Start Time",
+  "numberOfParticipants": "Number of Participants",
+  "playerRankings": "Player Rankings",
+  "viewPlayers": "View Players",
+  "ranking": "Ranking",
+  "points": "Points",
+  "matchWon": "Match Won",
+  "upcomingMatch": "Upcoming Match",
+  "completedMatch": "Completed Match",
+  "status": "Status",
+  "winner": "Winner",
+  "totalRound": "Total Rounds",
+  "tournamentStructure": "Tournament Structure",
+  "pickADate": "Pick a Date",
+  "player": "Player",
+  "email": "Email",
+  "eliminationType": "Elimination Type",
+  "participants": "Participants",
+  "round": "Round",
+  "final": "Final",
+  "semiFinal": "Semi-Final",
+  "matchDetail": "Match Detail",
+  "playerName": "Player Name",
+  "firstPick": "First Pick",
+  "goFirst": "Go First",
+  "numberOfBans": "Number of Bans",
+  "numberOfPicks": "Number of Picks",
+  "matchId": "Match ID",
+  "menuItems": "Menu Items",
+  "character": "Character",
+  "lightCones": "Light Cones",
+  "paths": "Paths",
+  "combatType": "Combat Type",
+  "selectCharacter": "Select Character",
+  "selectLightCones": "Select Light Cones",
+  "gameSetup": "Game Setup",
+  "slot": "Slot",
+  "matchResult": "Match Result",
+  "ban": "Ban",
+  "pick": "Pick",
+  "setUpTeam": "Set Up Team",
+  "sendGameSetup": "Send Game Setup",
+  "matchURL": "Match URL",
+  "viewer": "Viewer",
+  "bandedCharacter": "Banned Character",
+  "pickedCharacter": "Picked Character",
+  "rarity": "Rarity",
+  "setupMatch": "Set Up Match"
 }

@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { toast } from '@/components/hooks/use-toast';
@@ -30,6 +31,7 @@ import {
 import { Match } from '@/features/match/types';
 import { Player } from '@/features/tournament/type';
 import { cn } from '@/lib/utils';
+import { translations } from '@/locales/translations';
 
 type Props = {
   match: Match;
@@ -46,6 +48,8 @@ export const MatchEditorModal = ({
   onSubmit,
   isStart,
 }: Props) => {
+  const { t } = useTranslation();
+
   const formSchema = z.object({
     player1: z.string().optional(),
     player2: z.string().optional(),
@@ -87,7 +91,10 @@ export const MatchEditorModal = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg max-w-md w-full">
-        <h3 className="text-2xl font-bold mb-4">Match Editor</h3>
+        <h3 className="text-2xl font-bold mb-4">
+          {t(translations.actions.edit)}{' '}
+          {t(translations.pages.match).toLowerCase()}
+        </h3>
         <div className="text-start">
           <Form {...form}>
             <form className="space-y-2">
@@ -97,7 +104,7 @@ export const MatchEditorModal = ({
                 render={({ field }) => (
                   <FormItem className="text-start">
                     <FormLabel className="text-gray-700 font-bold">
-                      Date of Match
+                      {t(translations.startTime)}
                     </FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -114,7 +121,7 @@ export const MatchEditorModal = ({
                             {field.value ? (
                               format(field.value, 'd/L/y')
                             ) : (
-                              <span>Pick a date</span>
+                              <span>{t(translations.pickADate)}</span>
                             )}
                           </Button>
                         </FormControl>
@@ -195,7 +202,7 @@ export const MatchEditorModal = ({
                 name="winner"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Winner</FormLabel>
+                    <FormLabel>{t(translations.winner)}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}

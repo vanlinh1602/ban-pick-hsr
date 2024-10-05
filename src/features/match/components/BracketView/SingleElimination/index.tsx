@@ -1,9 +1,11 @@
 import _ from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Match } from '@/features/match/types';
 import { Player } from '@/features/tournament/type';
 import { generateID } from '@/lib/utils';
+import { translations } from '@/locales/translations';
 
 import { MatchEditorModal } from '../MatchEditorModal';
 import { ViewMatch } from '../ViewMatch';
@@ -28,6 +30,7 @@ const SingleElimination = ({
     roundIndex: number;
     data: Match;
   }>();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const paramsRound = _.cloneDeep(rounds);
@@ -113,14 +116,23 @@ const SingleElimination = ({
       ) : null}
       <div className="mx-auto px-4 pb-4 mt-4 max-h-full h-full overflow-y-scroll ">
         <div className="flex flex-row space-y-0 space-x-20 sticky top-0 bg-white">
-          {activeRounds.map((_round, index) => (
-            <div
-              key={`title-round-${index}`}
-              className="flex min-w-56 w-56 justify-center text-xl font-semibold bg-[#1e2235] text-white p-1 rounded-lg"
-            >
-              Round {index + 1}
-            </div>
-          ))}
+          {activeRounds.map((_round, index) => {
+            let title = `${t(translations.round)} ${index + 1}`;
+            if (index === activeRounds.length - 1) {
+              title = t(translations.final);
+            }
+            if (index === activeRounds.length - 2) {
+              title = t(translations.semiFinal);
+            }
+            return (
+              <div
+                key={`title-round-${index}`}
+                className="flex min-w-56 w-56 justify-center text-xl font-semibold bg-[#1e2235] text-white p-1 rounded-lg"
+              >
+                {title}
+              </div>
+            );
+          })}
         </div>
         <div className="flex flex-1">
           {activeRounds.map((round, roundIndex) => (

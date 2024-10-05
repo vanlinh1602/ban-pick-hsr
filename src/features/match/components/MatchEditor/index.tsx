@@ -7,6 +7,7 @@ import {
   DropResult,
 } from 'react-beautiful-dnd';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { FaBan, FaCheck } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
@@ -33,6 +34,7 @@ import {
 import { useMatchSlice } from '@/features/match/store';
 import { Match as MatchType } from '@/features/match/types';
 import { determineTurn, generateID } from '@/lib/utils';
+import { translations } from '@/locales/translations';
 import { socket } from '@/services/socket';
 
 import { selectMatchData } from '../../store/selectors';
@@ -45,6 +47,7 @@ type Props = {
 const MatchEditor = ({ id }: Props) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const { actions } = useMatchSlice();
   const [numBans, setNumBans] = useState(2);
   const [numPicks, setNumPicks] = useState(2);
@@ -176,14 +179,16 @@ const MatchEditor = ({ id }: Props) => {
       <div className="bg-white rounded-lg shadow p-4">
         <Form {...form}>
           <form className="space-y-8">
-            <h2 className="text-2xl font-bold">Match Details</h2>
+            <h2 className="text-2xl font-bold">
+              {t(translations.matchDetail)}
+            </h2>
             <div className="grid grid-cols-2 gap-5 text-start">
               <FormField
                 control={form.control}
                 name="player1"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Player Name 1</FormLabel>
+                    <FormLabel>{t(translations.playerName)} 1</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -195,7 +200,7 @@ const MatchEditor = ({ id }: Props) => {
                 name="player2"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>PLayer Name 2</FormLabel>
+                    <FormLabel>{t(translations.playerName)} 2</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -207,7 +212,7 @@ const MatchEditor = ({ id }: Props) => {
                 name="firstPick"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Pick</FormLabel>
+                    <FormLabel>{t(translations.firstPick)}</FormLabel>
                     <Select
                       onValueChange={(value) => {
                         setFirstPick(parseInt(value));
@@ -217,13 +222,13 @@ const MatchEditor = ({ id }: Props) => {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a verified email to display" />
+                          <SelectValue />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {['1', '2'].map((player) => (
                           <SelectItem key={player} value={player}>
-                            Player {player}
+                            {t(translations.player)} {player}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -236,20 +241,20 @@ const MatchEditor = ({ id }: Props) => {
                 name="goFirst"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Go First</FormLabel>
+                    <FormLabel>{t(translations.goFirst)}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value.toString()}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a verified email to display" />
+                          <SelectValue />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {['1', '2'].map((player) => (
                           <SelectItem key={player} value={player}>
-                            Player {player}
+                            {t(translations.player)} {player}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -262,7 +267,7 @@ const MatchEditor = ({ id }: Props) => {
                 name="numBans"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Number of Bans</FormLabel>
+                    <FormLabel>{t(translations.numberOfBans)}</FormLabel>
                     <Select
                       onValueChange={(value) => {
                         setNumBans(parseInt(value));
@@ -272,7 +277,7 @@ const MatchEditor = ({ id }: Props) => {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a verified email to display" />
+                          <SelectValue />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -291,7 +296,7 @@ const MatchEditor = ({ id }: Props) => {
                 name="numPicks"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Number of Picks</FormLabel>
+                    <FormLabel>{t(translations.numberOfPicks)}</FormLabel>
                     <Select
                       onValueChange={(value) => {
                         setNumPicks(parseInt(value));
@@ -301,7 +306,7 @@ const MatchEditor = ({ id }: Props) => {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a verified email to display" />
+                          <SelectValue />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -328,7 +333,7 @@ const MatchEditor = ({ id }: Props) => {
                   onSubmit(values, 'update');
                 }}
               >
-                Update
+                {t(translations.actions.update)}
               </Button>
               <Button
                 className="ml-5"
@@ -337,7 +342,7 @@ const MatchEditor = ({ id }: Props) => {
                   onSubmit(values, 'start');
                 }}
               >
-                Start
+                {t(translations.actions.start)}
               </Button>
             </>
           ) : (
@@ -347,7 +352,7 @@ const MatchEditor = ({ id }: Props) => {
                 onSubmit(values, 'create');
               }}
             >
-              Create
+              {t(translations.actions.create)}
             </Button>
           )}
         </div>
@@ -382,10 +387,12 @@ const MatchEditor = ({ id }: Props) => {
                           )}
                           {item.type.charAt(0).toUpperCase() +
                             item.type.slice(1)}{' '}
-                          {item.player === 1 ? ' (Player 1)' : ' (Player 2)'}
+                          {item.player === 1
+                            ? ` (${t(translations.player)} 1)`
+                            : ` (${t(translations.player)} 2)`}
                         </span>
                         <span className="text-gray-500 text-xs">
-                          Drag to reorder
+                          {t(translations.notify.dragToReorder)}
                         </span>
                       </li>
                     )}

@@ -1,8 +1,12 @@
 import { CopyIcon } from 'lucide-react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { LuCheckCheck } from 'react-icons/lu';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Match } from '@/features/match/types';
+import { translations } from '@/locales/translations';
 
 type Props = {
   match: Match;
@@ -10,7 +14,10 @@ type Props = {
 };
 
 const MatchUrlModal = ({ match, onClose }: Props) => {
-  const itemRenderer = (item: string) => {
+  const [copy, setCopy] = useState<string>();
+
+  const { t } = useTranslation();
+  const itemRenderer = (id: string, item: string) => {
     return (
       <div className="flex w-full max-w-sm items-center space-x-2">
         <Input type="text" placeholder="Enter text to copy" value={item} />
@@ -18,11 +25,15 @@ const MatchUrlModal = ({ match, onClose }: Props) => {
           size="icon"
           onClick={() => {
             navigator.clipboard.writeText(item);
+            setCopy(id);
           }}
           className={'transition-colors'}
         >
-          <CopyIcon className="h-4 w-4" />
-          <span className="sr-only">Copy to clipboard</span>
+          {copy === id ? (
+            <LuCheckCheck className="h-4 w-4" />
+          ) : (
+            <CopyIcon className="h-4 w-4" />
+          )}
         </Button>
       </div>
     );
@@ -37,24 +48,35 @@ const MatchUrlModal = ({ match, onClose }: Props) => {
         className="bg-white p-6 rounded-lg max-w-sm w-full"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-2xl font-bold mb-4">Match URL</h3>
+        <h3 className="text-2xl font-bold mb-4">{t(translations.matchURL)}</h3>
         <div className="text-start">
           <div className="space-y-2">
-            <div className="font-semibold text-sm">Player 1</div>
+            <div className="font-semibold text-sm">
+              {t(translations.player)} 1
+            </div>
             {itemRenderer(
+              'player1',
               `${window.location.origin}/match/${match.id}?s=${match.players[0]?.id}`,
             )}
-            <div className="font-semibold text-sm">Player 2</div>
+            <div className="font-semibold text-sm">
+              {t(translations.player)} 2
+            </div>
             {itemRenderer(
+              'player2',
               `${window.location.origin}/match/${match.id}?s=${match.players[1]?.id}`,
             )}
-            <div className="font-semibold text-sm">Viewer</div>
-            {itemRenderer(`${window.location.origin}/match/${match.id}`)}
+            <div className="font-semibold text-sm">
+              {t(translations.viewer)}
+            </div>
+            {itemRenderer(
+              'viewer',
+              `${window.location.origin}/match/${match.id}`,
+            )}
           </div>
         </div>
         <div className="space-x-5 mt-5">
           <Button variant="secondary" onClick={onClose}>
-            Close
+            {t(translations.actions.close)}
           </Button>
         </div>
       </div>

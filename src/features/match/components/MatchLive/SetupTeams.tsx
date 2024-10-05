@@ -1,30 +1,20 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { z } from 'zod';
 
+import { SearchableSelect } from '@/components';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Form, FormField, FormItem } from '@/components/ui/form';
 import {
   selectCharacters,
   selectConfigs,
   selectLightCones,
 } from '@/features/catalogs/store/selectors';
 import { MatchGame } from '@/features/match/types';
+import { translations } from '@/locales/translations';
 
 type Props = {
   disabledChars: string[];
@@ -39,6 +29,7 @@ export const SetupTeams = ({
   disabledChars,
   data,
 }: Props) => {
+  const { t } = useTranslation();
   const characters = useSelector(selectCharacters);
   const lightCones = useSelector(selectLightCones);
   const configs = useSelector(selectConfigs);
@@ -90,6 +81,7 @@ export const SetupTeams = ({
       },
     },
   });
+  console.log('data', data);
 
   useEffect(() => {
     const values = form.getValues();
@@ -121,16 +113,18 @@ export const SetupTeams = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg max-w-md w-full">
-        <h3 className="text-2xl font-bold mb-4">Game Setup</h3>
+        <h3 className="text-2xl font-bold mb-4">{t(translations.gameSetup)}</h3>
         <h3 className="text-xl font-bold mb-4 text-start">
-          Total: {totalPoints} points
+          {t(translations.total)}: {totalPoints} {t(translations.points)}
         </h3>
         <div className="text-start">
           <Form {...form}>
             <form className="space-y-2">
               {[0, 1, 2, 3].map((i) => (
                 <div key={i}>
-                  <div className="font-semibold">Slot {i + 1}</div>
+                  <div className="font-semibold">
+                    {t(translations.slot)} {i + 1}
+                  </div>
                   <FormField
                     control={form.control}
                     name={
@@ -139,71 +133,40 @@ export const SetupTeams = ({
                     render={({ field }) => (
                       <div className="grid grid-cols-2 gap-5">
                         <FormItem>
-                          <Select
-                            onValueChange={(value) => {
+                          <SearchableSelect
+                            options={activeChars.map((char) => ({
+                              value: char,
+                              label: characters[char].name,
+                              icons: characters[char].icon,
+                            }))}
+                            value={field.value.character}
+                            onSelect={(value) => {
                               form.setValue(
                                 `slot-${i}.character` as any,
                                 value,
                               );
                             }}
-                            defaultValue={field.value.character}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a character" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {activeChars.map((char) => (
-                                <SelectItem key={char} value={char}>
-                                  <div className="flex items-center">
-                                    <img
-                                      src={characters[char].icon}
-                                      alt={characters[char].name}
-                                      className="h-8 w-8 mr-2 rounded-full"
-                                    />
-                                    {characters[char].name}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
+                            placeholder={t(translations.selectCharacter)}
+                          />
                         </FormItem>
                         <FormItem>
-                          <Select
-                            onValueChange={(value) => {
+                          <SearchableSelect
+                            options={Object.entries(lightCones).map(
+                              ([id, lightCone]) => ({
+                                value: id,
+                                label: lightCone.name,
+                                icons: lightCone.icon,
+                              }),
+                            )}
+                            value={field.value.lightCone}
+                            onSelect={(value) => {
                               form.setValue(
                                 `slot-${i}.lightCone` as any,
                                 value,
                               );
                             }}
-                            defaultValue={field.value.lightCone}
-                          >
-                            <FormControl>
-                              <SelectTrigger spellCheck>
-                                <SelectValue placeholder="Select a light cone" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {Object.values(lightCones).map((lightCone) => (
-                                <SelectItem
-                                  key={lightCone.id}
-                                  value={lightCone.id}
-                                >
-                                  <div className="flex items-center">
-                                    <img
-                                      src={lightCone.icon}
-                                      alt={lightCone.name}
-                                      className="h-8 w-8 mr-2 rounded-full"
-                                    />
-                                    {lightCone.name}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
+                            placeholder={t(translations.selectLightCones)}
+                          />
                         </FormItem>
                       </div>
                     )}
@@ -215,10 +178,10 @@ export const SetupTeams = ({
         </div>
         <div className="space-x-5 mt-5">
           <Button variant="secondary" onClick={onClose}>
-            Close
+            {t(translations.actions.cancel)}
           </Button>
           <Button type="submit" onClick={form.handleSubmit(handleSubmit)}>
-            Submit
+            {t(translations.actions.submit)}
           </Button>
         </div>
       </div>

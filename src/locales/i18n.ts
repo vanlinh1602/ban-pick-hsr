@@ -23,7 +23,7 @@ export const i18n = i18next
   .use(LanguageDetector)
   .init({
     resources: translationsJson,
-    fallbackLng: 'vi',
+    fallbackLng: 'en',
     debug: import.meta.env.REACT_APP_STAGE !== 'production',
 
     interpolation: {

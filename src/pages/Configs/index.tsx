@@ -1,5 +1,6 @@
 import { cloneDeep, set } from 'lodash';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FaSearch } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
@@ -23,6 +24,8 @@ import {
 } from '@/features/catalogs/store/selectors';
 import { Character, Configs, LightCone } from '@/features/catalogs/types';
 import { EditPoints, PointsCard } from '@/features/configs/components';
+import { selectUserInformation } from '@/features/user/store/selectors';
+import { translations } from '@/locales/translations';
 
 type FilterField = {
   id: string;
@@ -36,12 +39,14 @@ type FilterField = {
 
 const PointsAdjuster = () => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const { actions } = useCatalogSlice();
   const allCharacters = useSelector(selectCharacters);
   const allLinghtCones = useSelector(selectLightCones);
   const filterCharacter = useSelector(selectFilterCharacter);
   const filterLightCone = useSelector(selectFilterLightCone);
   const systemConfigs = useSelector(selectConfigs);
+  const userInfo = useSelector(selectUserInformation);
 
   const [activeMenu, setActiveMenu] = useState('characters');
 
@@ -95,6 +100,7 @@ const PointsAdjuster = () => {
       });
       setActiveItems(Object.values(allLinghtCones));
     }
+    setSelectedCharacters([]);
     setFilterFields(menuFilter);
     setFilter({});
   }, [activeMenu]);
@@ -118,7 +124,11 @@ const PointsAdjuster = () => {
     if (sort === 'name') {
       filteredItems.sort((a, b) => a.name.localeCompare(b.name));
     } else if (sort === 'points') {
-      filteredItems.sort((a, b) => b.points - a.points);
+      filteredItems.sort(
+        (a, b) =>
+          (systemConfigs[b.id]?.points || 0) -
+          (systemConfigs[a.id]?.points || 0),
+      );
     }
     setActiveItems(filteredItems);
   }, [filter]);
@@ -157,19 +167,25 @@ const PointsAdjuster = () => {
           }
         />
       ) : null}
-      <h1 className="text-3xl font-bold mb-6">Points Adjuster</h1>
+      <h1 className="text-3xl font-bold mb-6">
+        {t(translations.pages.pointsAdustment)}
+      </h1>
       <div className="mb-4 flex items-center space-x-4 justify-between">
         <div className="flex">
           <div className="text-start mr-3">
-            <h1 className="text-gray-700 mb-1">Menu Items</h1>
+            <h1 className="text-gray-700 mb-1">{t(translations.menuItems)}</h1>
             <Select value={activeMenu} onValueChange={(v) => setActiveMenu(v)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select active" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="characters">Characters</SelectItem>
-                  <SelectItem value="lightCones">Light Cone</SelectItem>
+                  <SelectItem value="characters">
+                    {t(translations.character)}
+                  </SelectItem>
+                  <SelectItem value="lightCones">
+                    {t(translations.lightCones)}
+                  </SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -180,19 +196,22 @@ const PointsAdjuster = () => {
               <h1 className="text-gray-700 mb-1">{field.name}</h1>
               <Select
                 value={filter[field.id]}
-                onValueChange={(v) =>
+                onValueChange={(v) => {
                   setFilter((pre) => ({
                     ...pre,
                     [field.id]: v,
-                  }))
-                }
+                  }));
+                  if (selectedCharacters.length > 0) {
+                    setSelectedCharacters([]);
+                  }
+                }}
               >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder={`Select ${field.name}`} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="all">{t(translations.all)}</SelectItem>
                     {field.options.map((option) => (
                       <SelectItem key={option.id} value={option.id}>
                         <div className="flex">
@@ -216,11 +235,13 @@ const PointsAdjuster = () => {
         </div>
         <div className="flex">
           <div className="text-start mr-3">
-            <h1 className="text-gray-700 mb-1">Search</h1>
+            <h1 className="text-gray-700 mb-1">
+              {t(translations.actions.search)}
+            </h1>
             <div className="relative flex-grow">
               <input
                 type="text"
-                placeholder="Search characters..."
+                placeholder={`${t(translations.actions.search)}...`}
                 onChange={({ target }) =>
                   setFilter((pre) => ({ ...pre, name: target.value }))
                 }
@@ -231,7 +252,9 @@ const PointsAdjuster = () => {
             </div>
           </div>
           <div className="text-start mr-3">
-            <h1 className="text-gray-700 mb-1">Sort</h1>
+            <h1 className="text-gray-700 mb-1">
+              {t(translations.actions.sort)}
+            </h1>
             <Select
               value={filter.sort}
               onValueChange={(v) =>
@@ -246,35 +269,48 @@ const PointsAdjuster = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="points">Points</SelectItem>
+                  <SelectItem value="name">{t(translations.name)}</SelectItem>
+                  <SelectItem value="points">
+                    {t(translations.points)}
+                  </SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-end">
-            {selectedCharacters.length > 0 ? (
-              <>
-                <Button className="mr-3" onClick={() => setEditPoints('all')}>
-                  Edit
-                </Button>
+          {userInfo?.id ? (
+            <div className="flex items-end">
+              {selectedCharacters.length > 0 ? (
+                <>
+                  <Button className="mr-3" onClick={() => setEditPoints('all')}>
+                    {t(translations.actions.edit)}
+                  </Button>
+                  <Button
+                    className="mr-3"
+                    onClick={() => setSelectedCharacters([])}
+                  >
+                    {t(translations.actions.clear)}
+                  </Button>
+                </>
+              ) : (
                 <Button
                   className="mr-3"
-                  onClick={() => setSelectedCharacters([])}
+                  onClick={() =>
+                    setSelectedCharacters(activeItems.map(({ id }) => id))
+                  }
                 >
-                  Clear
+                  {t(translations.actions.selectAll)}
                 </Button>
-              </>
-            ) : null}
-            <Button
-              onClick={() => {
-                dispatch(actions.updateConfigs(updateConfigs));
-                setUpdateConfigs({});
-              }}
-            >
-              Save
-            </Button>
-          </div>
+              )}
+              <Button
+                onClick={() => {
+                  dispatch(actions.updateConfigs(updateConfigs));
+                  setUpdateConfigs({});
+                }}
+              >
+                {t(translations.actions.save)}
+              </Button>
+            </div>
+          ) : null}
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 cursor-pointer">
@@ -299,6 +335,7 @@ const PointsAdjuster = () => {
                 }
               }}
               selected={selectedCharacters.includes(item.id)}
+              allowEdit={!!userInfo?.id}
             />
           </div>
         ))}

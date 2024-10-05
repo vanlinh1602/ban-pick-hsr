@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { FaUser } from 'react-icons/fa';
 import { TbLogin } from 'react-icons/tb';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
@@ -27,6 +28,8 @@ import { useUserSlice } from '@/features/user/store';
 import { selectUserInformation } from '@/features/user/store/selectors';
 import { translations } from '@/locales/translations';
 import { auth } from '@/services/firebase';
+
+import LanguageSelector from './LanguageSelector';
 
 const MenuBar = () => {
   const navigate = useNavigate();
@@ -125,15 +128,19 @@ const MenuBar = () => {
 
           {/* User Menu and Notifications */}
           <div className="hidden md:flex items-center justify-end md:flex-1 lg:w-0">
+            <LanguageSelector />
             {userInfo?.id ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center">
-                    <Avatar>
-                      <AvatarImage src={logo} alt="avatar" />
-                      <AvatarFallback>User</AvatarFallback>
-                    </Avatar>
-
+                    {userInfo?.avatar ? (
+                      <Avatar>
+                        <AvatarImage src={userInfo.avatar} alt="avatar" />
+                        <AvatarFallback>User</AvatarFallback>
+                      </Avatar>
+                    ) : (
+                      <FaUser className="h-5 w-5 text-gray-600" />
+                    )}
                     <ChevronDown className="ml-2 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -152,7 +159,7 @@ const MenuBar = () => {
                     }}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
+                    <span>{t(translations.actions.logOut)}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -174,22 +181,22 @@ const MenuBar = () => {
       <div className={`${mobileMenuOpen ? 'block' : 'hidden'} md:hidden`}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
           <a
-            href="#"
             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+            onClick={() => navigate('/home')}
           >
-            Dashboard
+            {t(translations.pages.home)}
           </a>
           <a
-            href="#"
             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+            onClick={() => navigate('/match')}
           >
-            Users
+            {t(translations.pages.match)}
           </a>
           <a
-            href="#"
             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+            onClick={() => navigate('/configs')}
           >
-            Settings
+            {t(translations.pages.config)}
           </a>
         </div>
       </div>

@@ -1,7 +1,10 @@
 import { format } from 'date-fns';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { Button } from '@/components/ui/button';
 import { Match } from '@/features/match/types';
+import { translations } from '@/locales/translations';
 
 type Props = {
   match: Match;
@@ -9,6 +12,7 @@ type Props = {
 };
 
 export const ViewMatch = ({ match, onClose }: Props) => {
+  const { t } = useTranslation();
   const playerPoints = useMemo(() => {
     return match.games?.reduce(
       (acc, game) => {
@@ -27,10 +31,12 @@ export const ViewMatch = ({ match, onClose }: Props) => {
       onClick={onClose}
     >
       <div
-        className="bg-white p-6 rounded-lg max-w-xs w-full cursor-default"
+        className="bg-white p-6 rounded-lg max-w-sm w-full cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-2xl font-bold mb-3">Match Details</h3>
+        <h3 className="text-2xl font-bold mb-3">
+          {t(translations.matchDetail)}
+        </h3>
         <div className="font-semibold ">
           <span className="ml-1 mb-3">
             {format(match.date || Date.now(), 'dd/LL/y')}
@@ -51,12 +57,12 @@ export const ViewMatch = ({ match, onClose }: Props) => {
             <span>{playerPoints?.[1] || '--'}</span>
           </div>
         </div>
-        <button
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        <Button
+          className="mt-4 px-4 py-2 text-white rounded  transition-colors"
           onClick={onClose}
         >
-          Close
-        </button>
+          {t(translations.actions.back)}
+        </Button>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
@@ -14,9 +15,11 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { translations } from '@/locales/translations';
 
 const JoinMatch = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const formSchema = z.object({
     matchId: z.string().min(1),
@@ -51,12 +54,12 @@ const JoinMatch = () => {
               name="matchId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Match ID</FormLabel>
+                  <FormLabel>{t(translations.matchId)}</FormLabel>
                   <FormControl>
                     <Input placeholder="Match ID" {...field} />
                   </FormControl>
                   <FormDescription className="text-start">
-                    Input the match ID to join the match.
+                    {t(translations.notify.inputMatchId)}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -72,14 +75,14 @@ const JoinMatch = () => {
                     <Input placeholder="Player security" {...field} />
                   </FormControl>
                   <FormDescription className="">
-                    If you are player, input the security ID.
+                    {t(translations.notify.inputPlayerId)}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <Button className="text-center w-full" type="submit">
-              Join
+              {t(translations.actions.joinMatch)}
             </Button>
           </form>
         </Form>

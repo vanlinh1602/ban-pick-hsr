@@ -204,7 +204,7 @@ const BracketTournament = () => {
           {!tournament?.status || tournament.status === 'set-up' ? (
             <>
               <h2 className="text-sm font-semibold text-start mb-2">
-                Elimination Type
+                {t(translations.eliminationType)}
               </h2>
               <div className="flex gap-2 mb-2 items-center">
                 <Select
@@ -230,7 +230,7 @@ const BracketTournament = () => {
                   className="text-black"
                   onClick={handleCreate}
                 >
-                  Create
+                  {t(translations.actions.create)}
                 </Button>
               </div>
             </>
@@ -238,7 +238,8 @@ const BracketTournament = () => {
 
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-sm font-semibold">
-              Participants ({cloneTournament?.players?.length})
+              {t(translations.participants)} (
+              {cloneTournament?.players?.length || 0})
             </h2>
             {!tournament?.status || tournament.status === 'set-up' ? (
               <Button
@@ -248,12 +249,12 @@ const BracketTournament = () => {
                 onClick={() => setEditPlayer({})}
               >
                 <TbUsersPlus className="h-4 w-4 mr-2" />
-                Add
+                {t(translations.actions.add)}
               </Button>
             ) : null}
           </div>
           <Input
-            placeholder="Search..."
+            placeholder={`${t(translations.actions.search)}...`}
             className="bg-[#2a2f44] border-none text-white mb-4"
           />
           <ScrollArea className="flex-grow">
@@ -272,9 +273,13 @@ const BracketTournament = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => setEditPlayer({ index })}>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setEditPlayer({ index });
+                      }}
+                    >
                       <FaRegEdit className="mr-2" />
-                      Edit
+                      {t(translations.actions.edit)}
                     </DropdownMenuItem>
                     {!tournament?.status || tournament.status === 'set-up' ? (
                       <DropdownMenuItem
@@ -283,11 +288,14 @@ const BracketTournament = () => {
                           const players = cloneTournament?.players.filter(
                             (p) => p.id !== player.id,
                           );
-                          setCloneTournament({ ...cloneTournament!, players });
+                          setCloneTournament({
+                            ...cloneTournament!,
+                            players,
+                          });
                         }}
                       >
                         <FaRegTrashAlt className="mr-2" />
-                        Remove
+                        {t(translations.actions.delete)}
                       </DropdownMenuItem>
                     ) : null}
                   </DropdownMenuContent>
@@ -300,7 +308,7 @@ const BracketTournament = () => {
             className="mt-4 text-gray-600 border-dashed border-white/20"
             onClick={handleSave}
           >
-            Save
+            {t(translations.actions.save)}
           </Button>
         </div>
 

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FaInfoCircle } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
@@ -18,6 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { selectCharacters } from '@/features/catalogs/store/selectors';
 import type { Character } from '@/features/catalogs/types';
+import { translations } from '@/locales/translations';
 import { socket } from '@/services/socket';
 
 import { useMatchSlice } from '../../store';
@@ -34,6 +36,7 @@ type Props = {
 
 const MatchLive = ({ id }: Props) => {
   const location = useLocation();
+  const { t } = useTranslation();
   const { state, search } = location;
 
   const dispatch = useDispatch();
@@ -150,7 +153,7 @@ const MatchLive = ({ id }: Props) => {
       <div className="flex flex-col md:flex-row h-full bg-gray-100">
         {/* Left Column - Video Player */}
         <div className="md:w-2/3 p-4">
-          {player && activeTurn !== player ? (
+          {matchDetail?.games?.length && player && activeTurn !== player ? (
             <PlayerVideo room={id} />
           ) : (
             <ViewerVideo room={id} isLive={matchDetail.isLive} />
@@ -160,7 +163,7 @@ const MatchLive = ({ id }: Props) => {
         <div className="md:w-1/3 p-4">
           <div className="bg-white rounded-lg shadow-md p-6 mb-2">
             <h3 className="text-2xl text-gray-800 mb-2 font-bold flex justify-center items-center">
-              Match Result
+              {t(translations.matchResult)}
               <FaInfoCircle
                 className="inline-block text-blue-700 text-lg ml-2"
                 onClick={() =>
@@ -198,7 +201,9 @@ const MatchLive = ({ id }: Props) => {
                   );
                 })}
               </div>
-              <div className="text-base font-bold text-red-400 w-2/12">Ban</div>
+              <div className="text-base font-bold text-red-400 w-2/12">
+                {t(translations.ban)}
+              </div>
               <div className="text-center w-5/12 flex justify-center">
                 {playerData.player2.bans.map((char) => {
                   return (
@@ -226,7 +231,7 @@ const MatchLive = ({ id }: Props) => {
                 })}
               </div>
               <div className="text-base font-bold text-blue-400 w-2/12">
-                Pick
+                {t(translations.pick)}
               </div>
               <div className="text-center w-5/12 flex justify-center">
                 {playerData.player2.picks.map((char) => {
@@ -246,25 +251,31 @@ const MatchLive = ({ id }: Props) => {
           <div className="text-end text-blue-600 font-semibold cursor-pointer mb-2">
             {activeTurn === player ? (
               <div className="space-x-2">
-                <Button onClick={() => setShowSetup(true)}>Set up teams</Button>
+                <Button onClick={() => setShowSetup(true)}>
+                  {t(translations.setUpTeam)}
+                </Button>
                 <AlertDialog>
                   <AlertDialogTrigger>
-                    <Button className="bg-green-600">Send set up</Button>
+                    <Button variant="destructive">
+                      {t(translations.sendGameSetup)}
+                    </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>
-                        Are you absolutely sure?
+                        {t(translations.notify.youSure)}
                       </AlertDialogTitle>
                       <AlertDialogDescription>
-                        This action cannot be undone. This will store and send
-                        your set up to the server.
+                        {t(translations.notify.cannotUndo)}{' '}
+                        {t(translations.notify.sendGameSetup)}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogCancel>
+                        {t(translations.actions.cancel)}
+                      </AlertDialogCancel>
                       <AlertDialogAction onClick={handleSendGameSetup}>
-                        Continue
+                        {t(translations.actions.submit)}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>

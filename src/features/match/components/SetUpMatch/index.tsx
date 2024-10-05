@@ -1,13 +1,17 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FaInfoCircle } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+
+import { translations } from '@/locales/translations';
 
 import { selectMatchData } from '../../store/selectors';
 import MatchEditor from '../MatchEditor';
 import MatchUrlModal from '../MatchUrlModal';
 
 export const SetUpMatch = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const [showModal, setShowModal] = useState(false);
   const matchData = useSelector((state: any) => selectMatchData(state, id!));
@@ -17,7 +21,7 @@ export const SetUpMatch = () => {
         <MatchUrlModal match={matchData} onClose={() => setShowModal(false)} />
       ) : null}
       <h1 className="text-2xl  font-extrabold mb-3 flex items-center content-center justify-center">
-        SET UP MATCH
+        {t(translations.setupMatch)}
         <FaInfoCircle
           className="inline-block text-gray-700 text-lg ml-2"
           onClick={() =>

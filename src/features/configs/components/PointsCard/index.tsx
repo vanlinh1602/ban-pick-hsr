@@ -1,6 +1,8 @@
+import { useTranslation } from 'react-i18next';
 import { FiEdit2 } from 'react-icons/fi';
 
 import { Checkbox } from '@/components/ui/checkbox';
+import { translations } from '@/locales/translations';
 type Props = {
   roundImg?: boolean;
   item: {
@@ -11,10 +13,18 @@ type Props = {
     id: string;
   };
   selected: boolean;
+  allowEdit?: boolean;
   onClick: (id: string, action: 'select' | 'edit') => void;
 };
 
-const PointsCard = ({ item, selected, onClick, roundImg }: Props) => {
+const PointsCard = ({
+  item,
+  selected,
+  onClick,
+  roundImg,
+  allowEdit,
+}: Props) => {
+  const { t } = useTranslation();
   let rarityColor = '';
   if (item.rarity[0]?.id === '1719') {
     rarityColor = 'text-blue-400';
@@ -42,30 +52,32 @@ const PointsCard = ({ item, selected, onClick, roundImg }: Props) => {
         <div className="flex flex-col text-start overflow-hidden">
           <p className="text-base font-semibold line-clamp-1">{item.name}</p>
           <p className="text-sm text-gray-600">
-            <b>Rarity:</b>
+            <b>{t(translations.rarity)}:</b>
             <b className={`ml-2 ${rarityColor}`}>
               {item.rarity[0]?.value || 'Unknown'}
             </b>
           </p>
           <p className="text-sm text-gray-600">
-            <b>Points:</b>
+            <b>{t(translations.points)}:</b>
             <b className="ml-2">{item.points}</b>
           </p>
         </div>
       </div>
-      <div className="flex flex-col items-center justify-between">
-        <Checkbox
-          id={item.id}
-          checked={selected}
-          onCheckedChange={() => {
-            onClick(item.id, 'select');
-          }}
-        />
-        <FiEdit2
-          className="text-xl text-blue-400 z-10"
-          onClick={() => onClick(item.id, 'edit')}
-        />
-      </div>
+      {allowEdit ? (
+        <div className="flex flex-col items-center justify-between">
+          <Checkbox
+            id={item.id}
+            checked={selected}
+            onCheckedChange={() => {
+              onClick(item.id, 'select');
+            }}
+          />
+          <FiEdit2
+            className="text-xl text-blue-400 z-10"
+            onClick={() => onClick(item.id, 'edit')}
+          />
+        </div>
+      ) : null}
     </div>
   );
 };
