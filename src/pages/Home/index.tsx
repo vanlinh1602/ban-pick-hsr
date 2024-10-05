@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   FaCalendarAlt,
   FaFilter,
@@ -11,6 +12,8 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { Waiting } from '@/components';
+import { toast } from '@/components/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 import { EditTournament } from '@/features/tournament/components';
 import { useTournamentSlice } from '@/features/tournament/store';
 import {
@@ -18,11 +21,16 @@ import {
   selectTournaments,
 } from '@/features/tournament/store/selectors';
 import { Tournament } from '@/features/tournament/type';
+import { selectUserInformation } from '@/features/user/store/selectors';
+import { translations } from '@/locales/translations';
+
+import { Filter } from './Filter';
 
 const HomePage = () => {
   const dispatch = useDispatch();
   const navigation = useNavigate();
   const { actions } = useTournamentSlice();
+  const { t } = useTranslation();
 
   const allTournaments = useSelector(selectTournaments);
   const handling = useSelector(selectTournamentHandling);
@@ -30,6 +38,7 @@ const HomePage = () => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+  const userInfo = useSelector(selectUserInformation);
 
   useEffect(() => {
     dispatch(actions.getTournaments());
@@ -40,6 +49,14 @@ const HomePage = () => {
   }, [allTournaments]);
 
   const handleCreateTournament = () => {
+    if (!userInfo?.id) {
+      toast({
+        variant: 'destructive',
+        title: t(translations.errors.error),
+        description: t(translations.errors.requireLogin),
+      });
+      return;
+    }
     setIsCreateModalOpen(true);
   };
 
@@ -47,73 +64,41 @@ const HomePage = () => {
     setIsFilterDropdownOpen(!isFilterDropdownOpen);
   };
 
-  const applyFilters = () => {
-    // Implement filter logic here
-  };
+  const applyFilters = (values: { status?: string; date?: number }) => {
+    const newFilter = Object.values(allTournaments).filter((tournament) => {
+      if (values.status) {
+        if (values.status === 'upcoming' && tournament.date.from < Date.now()) {
+          return false;
+        }
+        if (
+          values.status === 'inProgress' &&
+          (tournament.date.from > Date.now() ||
+            !tournament.date.to ||
+            tournament.date.to < Date.now())
+        ) {
+          return false;
+        }
+        if (
+          values.status === 'completed' &&
+          tournament.date.to &&
+          tournament.date.to > Date.now()
+        ) {
+          return false;
+        }
+      }
 
-  const FilterDropdown = ({ isOpen, onClose, onFilter }: any) => {
-    if (!isOpen) return null;
+      if (
+        values.date &&
+        (tournament.date.from > values.date ||
+          !tournament.date.to ||
+          tournament.date.to < values.date)
+      ) {
+        return false;
+      }
 
-    return (
-      <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl z-10">
-        <div className="p-4">
-          <h3 className="text-lg font-semibold mb-2">Filter Tournaments</h3>
-          <div className="mb-2">
-            <label
-              htmlFor="dateFilter"
-              className="block text-gray-700 font-bold mb-1"
-            >
-              Date
-            </label>
-            <input
-              type="date"
-              id="dateFilter"
-              className="w-full px-2 py-1 border rounded"
-            />
-          </div>
-          <div className="mb-2">
-            <label
-              htmlFor="locationFilter"
-              className="block text-gray-700 font-bold mb-1"
-            >
-              Location
-            </label>
-            <input
-              type="text"
-              id="locationFilter"
-              className="w-full px-2 py-1 border rounded"
-              placeholder="Enter location"
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="categoryFilter"
-              className="block text-gray-700 font-bold mb-1"
-            >
-              Category
-            </label>
-            <select
-              id="categoryFilter"
-              className="w-full px-2 py-1 border rounded"
-            >
-              <option value="">All Categories</option>
-              <option value="amateur">Amateur</option>
-              <option value="professional">Professional</option>
-              <option value="youth">Youth</option>
-            </select>
-          </div>
-          <button
-            onClick={() => {
-              onFilter();
-              onClose();
-            }}
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors duration-300"
-          >
-            Apply Filters
-          </button>
-        </div>
-      </div>
-    );
+      return true;
+    });
+    setTournaments(newFilter);
   };
 
   const createTournament = (data: Partial<Tournament>) => {
@@ -126,46 +111,47 @@ const HomePage = () => {
       {handling ? <Waiting /> : null}
       <header className="mb-8">
         <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          Tournament Dashboard
+          {t(translations.pages.tournament)}
         </h1>
         <div className="flex justify-between mb-6">
-          <button
+          <Button
             onClick={handleCreateTournament}
-            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-300 flex items-center"
-            aria-label="Create New Tournament"
+            className="text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center"
           >
-            <FaPlus className="mr-2" /> Create New Tournament
-          </button>
+            <FaPlus className="mr-2" /> {t(translations.actions.create)}
+          </Button>
           <div className="relative">
-            <button
+            <Button
               onClick={handleFilterTournaments}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-300 flex items-center"
+              className="px-4 py-2 rounded-lg transition-colors duration-300 flex items-center"
               aria-label="Filter Tournaments"
+              variant="outline"
             >
-              <FaFilter className="mr-2" /> Filter Tournaments
-            </button>
-            <FilterDropdown
-              isOpen={isFilterDropdownOpen}
-              onClose={() => setIsFilterDropdownOpen(false)}
-              onFilter={applyFilters}
-            />
+              <FaFilter className="mr-2" /> {t(translations.actions.filter)}
+            </Button>
+            {isFilterDropdownOpen ? (
+              <Filter
+                onClose={() => setIsFilterDropdownOpen(false)}
+                onFilter={applyFilters}
+              />
+            ) : null}
           </div>
         </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {tournaments.map((tournament) => {
-          let status = 'Upcoming';
+          let status = t(translations.tournament.status.upcoming);
           let statusColor = 'text-blue-500';
           if (tournament.date.from < Date.now()) {
-            status = 'Ongoing';
+            status = t(translations.tournament.status.inProgress);
             statusColor = 'text-yellow-500';
           }
           if (
             (tournament.date.to && tournament.date.to < Date.now()) ||
             (!tournament.date.to && tournament.date.from < Date.now())
           ) {
-            status = 'Completed';
+            status = t(translations.tournament.status.completed);
             statusColor = 'text-green-500';
           }
 
@@ -186,18 +172,19 @@ const HomePage = () => {
                     : ''}
                 </p>
                 <p className="text-gray-600 mb-4 flex items-center">
-                  <FaMapMarkerAlt className="mr-2" /> {tournament.organizer}
+                  <FaMapMarkerAlt className="mr-2" />{' '}
+                  {tournament?.organizer?.name}
                 </p>
                 <div className="flex justify-between items-center">
                   <span className={`text-sm font-semibold ${statusColor}`}>
                     {status}
                   </span>
-                  <button
-                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
+                  <Button
+                    className="font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
                     onClick={() => navigation(`/tournament/${tournament.id}`)}
                   >
-                    View Details
-                  </button>
+                    {t(translations.actions.viewDetail)}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -207,6 +194,7 @@ const HomePage = () => {
 
       {isCreateModalOpen ? (
         <EditTournament
+          user={userInfo!}
           onClose={() => setIsCreateModalOpen(false)}
           onConfirm={createTournament}
         />

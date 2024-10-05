@@ -52,7 +52,7 @@ const MatchDetail = () => {
     if (!matchData) return 'viewer';
     const params = new URLSearchParams(search);
     const security = params.get('s') || state?.securityId;
-    if (security === matchData.host?.id || security === matchData.host?.email) {
+    if (security === matchData.host) {
       return 'host';
     }
     if (matchData.players.some((player: any) => player.id === security)) {

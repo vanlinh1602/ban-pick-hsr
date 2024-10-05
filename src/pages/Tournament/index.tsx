@@ -26,9 +26,10 @@ import {
 import { useMatchSlice } from '@/features/match/store';
 import { selectMatchOfTournament } from '@/features/match/store/selectors';
 import { Match } from '@/features/match/types';
-import { EditTournament, ViewPlayers } from '@/features/tournament/components';
+import { EditTournament } from '@/features/tournament/components';
 import { useTournamentSlice } from '@/features/tournament/store';
 import { selectTournamentData } from '@/features/tournament/store/selectors';
+import { selectUserInformation } from '@/features/user/store/selectors';
 import { translations } from '@/locales/translations';
 type TournamentData = {
   players: {
@@ -56,12 +57,13 @@ const TournamentDetails = () => {
   const tournamentMatches = useSelector((state: any) =>
     selectMatchOfTournament(state, id!),
   );
+  const userInfo = useSelector(selectUserInformation);
 
   const [expandedMatch, setExpandedMatch] = useState<string>();
   const [rounds, setRounds] = useState<CustomObject<Match[]>[]>([]);
-  const [sortCriteria, setSortCriteria] = useState('ranking');
+  const [sortCriteria, setSortCriteria] = useState('matchesWon');
   const [isEditing, setIsEditing] = useState(false);
-  const [showPlayer, setShowPlayer] = useState(false);
+  // const [showPlayer, setShowPlayer] = useState(false);
 
   useEffect(() => {
     dispatch(matchActions.getMatches({ tournament: id! }));
@@ -95,7 +97,18 @@ const TournamentDetails = () => {
         upcomingMatches: Match[];
         completedMatches: Match[];
       } = {
-        players: {},
+        players:
+          tournament?.players?.reduce(
+            (acc, player) => ({
+              ...acc,
+              [player.id]: {
+                name: player.name,
+                points: 0,
+                matchesWon: 0,
+              },
+            }),
+            {},
+          ) || {},
         upcomingMatches: [],
         completedMatches: [],
       };
@@ -112,15 +125,10 @@ const TournamentDetails = () => {
               (acc, game) => {
                 const { player, points } = game;
                 acc[player - 1].points += points;
-                if (winner === player) {
-                  acc[player - 1].matchesWon += 1;
-                }
+
                 return acc;
               },
-              [
-                { points: 0, matchesWon: 0 },
-                { points: 0, matchesWon: 0 },
-              ] as { points: number; matchesWon: number }[],
+              [{ points: 0 }, { points: 0 }] as { points: number }[],
             );
             matchPlayers?.forEach((player, index) => {
               if (!initialData.players[player.id]) {
@@ -132,8 +140,9 @@ const TournamentDetails = () => {
               }
               initialData.players[player.id].points +=
                 gameResults?.[index]?.points || 0;
-              initialData.players[player.id].matchesWon +=
-                gameResults?.[index]?.matchesWon || 0;
+              if (winner === index + 1) {
+                initialData.players[player.id].matchesWon += 1;
+              }
             });
             if (match.players.length === 2) {
               if (date && date >= now) {
@@ -155,12 +164,15 @@ const TournamentDetails = () => {
       };
     }, [tournament, tournamentMatches]);
 
-  const sortedPlayers = [...players].sort((a, b) => {
-    if (sortCriteria === 'ranking') return a.ranking - b.ranking;
-    if (sortCriteria === 'points') return b.points - a.points;
-    if (sortCriteria === 'matchesWon') return b.matchesWon - a.matchesWon;
-    return 0;
-  });
+  const sortedPlayers = useMemo(
+    () =>
+      [...players].sort((a, b) => {
+        if (sortCriteria === 'points') return b.points - a.points;
+        if (sortCriteria === 'matchesWon') return b.matchesWon - a.matchesWon;
+        return 0;
+      }),
+    [players, sortCriteria],
+  );
 
   const toggleMatchExpansion = (matchId: string) => {
     setExpandedMatch((pre) => (pre === matchId ? undefined : matchId));
@@ -180,23 +192,24 @@ const TournamentDetails = () => {
             setIsEditing(false);
           }}
           data={tournament}
+          user={userInfo!}
         />
       )}
-      {showPlayer && (
-        <ViewPlayers tournamentId={id!} onClose={() => setShowPlayer(false)} />
-      )}
+
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="grid grid-cols-3 mb-8">
           <div></div>
           <h1 className="text-4xl font-bold  text-center">
             {tournament?.name}
           </h1>
-          <div className="flex justify-end items-center">
-            <FaRegEdit
-              className="text-xl text-blue-400"
-              onClick={() => setIsEditing(true)}
-            />
-          </div>
+          {userInfo?.email === tournament?.organizer?.id ? (
+            <div className="flex justify-end items-center">
+              <FaRegEdit
+                className="text-xl text-primary"
+                onClick={() => setIsEditing(true)}
+              />
+            </div>
+          ) : null}
         </div>
         <section
           className="mb-10 bg-white rounded-lg shadow-lg p-6"
@@ -206,15 +219,15 @@ const TournamentDetails = () => {
             id="structure-title"
             className="text-lg font-semibold mb-4 flex items-center"
           >
-            <FaAudioDescription className="mr-2 text-blue-500" />
-            {t(translations.decriptions)}:{' '}
+            <FaAudioDescription className="mr-2 text-primary" />
+            {t(translations.descriptions)}:{' '}
             <span className="ml-2 font-normal">{tournament?.description}</span>
           </h2>
           <h2
             id="structure-title"
             className="text-lg font-semibold mb-4 flex items-center"
           >
-            <FaCalendarAlt className="mr-2 text-blue-500" />
+            <FaCalendarAlt className="mr-2 text-primary" />
             {t(translations.date)}:{' '}
             <span className="ml-2 font-normal">
               {format(tournament?.date?.from || Date.now(), 'd/L/y')}
@@ -227,15 +240,17 @@ const TournamentDetails = () => {
             id="structure-title"
             className="text-lg font-semibold mb-4 flex items-center"
           >
-            <GoOrganization className="mr-2 text-blue-500" />
+            <GoOrganization className="mr-2 text-primary" />
             {t(translations.organizer)}:{' '}
-            <span className="ml-2 font-normal">{tournament?.organizer}</span>
+            <span className="ml-2 font-normal">
+              {tournament?.organizer?.name}
+            </span>
           </h2>
           <h2
             id="structure-title"
             className="text-lg font-semibold flex items-center"
           >
-            <VscOrganization className="mr-2 text-blue-500" />
+            <VscOrganization className="mr-2 text-primary" />
             {t(translations.numberOfParticipants)}:{' '}
             <span className="ml-2 font-normal">
               {tournament?.players?.length || 0}
@@ -255,30 +270,29 @@ const TournamentDetails = () => {
                 <FaTrophy className="mr-2 text-yellow-500" />{' '}
                 {t(translations.playerRankings)}
               </h2>
-              <Button
+              {/* <Button
                 className="mb-4 bg-blue-500 hover:bg-blue-600 text-white"
                 onClick={() => setShowPlayer(true)}
               >
                 {t(translations.viewPlayers)}
-              </Button>
+              </Button> */}
             </div>
-            <div className="mb-4 flex justify-between items-center">
+            <div className="mb-4 flex flex-col items-start justify-start md:flex-row md:justify-between md:items-center">
               <div className="relative">
                 <input
                   type="text"
                   placeholder="Search players"
-                  className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   aria-label="Search players"
                 />
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               </div>
               <select
-                className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary mt-1 md:mt-0"
                 value={sortCriteria}
                 onChange={(e) => setSortCriteria(e.target.value)}
                 aria-label="Sort criteria"
               >
-                <option value="ranking">{t(translations.ranking)}</option>
                 <option value="points">{t(translations.points)}</option>
                 <option value="matchesWon">{t(translations.matchWon)}</option>
               </select>
@@ -364,7 +378,7 @@ const TournamentDetails = () => {
                             <p className="text-sm text-gray-600 mt-1 text-start">
                               <b className="mr-1">{t(translations.winner)}: </b>
                               {match.winner
-                                ? match.players[match.winner].name
+                                ? match.players[match.winner - 1].name
                                 : '----'}
                             </p>
                             <p className="text-sm text-gray-600 mt-1 text-start">
@@ -375,7 +389,7 @@ const TournamentDetails = () => {
                             </p>
                           </div>
                           <Button
-                            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white"
+                            className="mt-4"
                             onClick={() => navigator(`/match/${match.id}`)}
                           >
                             {t(translations.actions.view)}
@@ -437,7 +451,7 @@ const TournamentDetails = () => {
                             <p className="text-sm text-gray-600 mt-1 text-start">
                               <b className="mr-1">{t(translations.winner)}: </b>
                               {match.winner
-                                ? match.players[match.winner].name
+                                ? match.players[match.winner - 1].name
                                 : '----'}
                             </p>
                             <p className="text-sm text-gray-600 mt-1 text-start">
@@ -448,7 +462,7 @@ const TournamentDetails = () => {
                             </p>
                           </div>
                           <Button
-                            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white"
+                            className="mt-4"
                             onClick={() => navigator(`/match/${match.id}`)}
                           >
                             {t(translations.actions.view)}
@@ -476,15 +490,21 @@ const TournamentDetails = () => {
               id="structure-title"
               className="text-2xl font-semibold mb-4 flex items-center"
             >
-              <FaUsers className="mr-2 text-green-500" />{' '}
+              <FaUsers className="mr-2 text-primary" />{' '}
               {t(translations.tournamentStructure)}
             </h2>
-            <FaRegEdit
-              className="text-xl text-blue-400 mb-4"
-              onClick={() => navigator(`/tournament/${id}/edit`)}
-            />
+            {userInfo?.email === tournament?.organizer?.id ? (
+              <FaRegEdit
+                className="text-xl text-primary mb-4"
+                onClick={() => navigator(`/tournament/${id}/edit`)}
+              />
+            ) : null}
           </div>
-          <div className="h-96">
+          <div
+            style={{
+              height: window.innerHeight - 200,
+            }}
+          >
             {tournament?.format === 'single' ? (
               <SingleElimination rounds={(rounds || []) as any} />
             ) : null}

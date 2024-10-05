@@ -13,6 +13,7 @@ type Props = {
   allowEdit?: boolean;
   players?: Player[];
   onSubmitEdit?: (roundIndex: number, data: Match) => void;
+  isStart?: boolean;
 };
 
 const SingleElimination = ({
@@ -20,6 +21,7 @@ const SingleElimination = ({
   allowEdit,
   players,
   onSubmitEdit,
+  isStart,
 }: Props) => {
   const [activeRounds, setActiveRounds] = useState<{ matches: Match[] }[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<{
@@ -93,6 +95,7 @@ const SingleElimination = ({
         <>
           {allowEdit ? (
             <MatchEditorModal
+              isStart={isStart}
               match={selectedMatch.data}
               onClose={() => setSelectedMatch(undefined)}
               allPlayers={players || []}
@@ -109,7 +112,7 @@ const SingleElimination = ({
         </>
       ) : null}
       <div className="mx-auto px-4 pb-4 mt-4 max-h-full h-full overflow-y-scroll ">
-        <div className="flex flex-col md:flex-row  space-y-8 md:space-y-0 md:space-x-20 sticky top-0 bg-white">
+        <div className="flex flex-row space-y-0 space-x-20 sticky top-0 bg-white">
           {activeRounds.map((_round, index) => (
             <div
               key={`title-round-${index}`}

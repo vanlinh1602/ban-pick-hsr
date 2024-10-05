@@ -36,6 +36,7 @@ type Props = {
   allPlayers: Player[];
   onClose: () => void;
   onSubmit: (match: Match) => void;
+  isStart?: boolean;
 };
 
 export const MatchEditorModal = ({
@@ -43,6 +44,7 @@ export const MatchEditorModal = ({
   onClose,
   allPlayers,
   onSubmit,
+  isStart,
 }: Props) => {
   const formSchema = z.object({
     player1: z.string().optional(),
@@ -130,60 +132,64 @@ export const MatchEditorModal = ({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="player1"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Player 1</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a players" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {allPlayers.map((player) => (
-                          <SelectItem key={player.id} value={player.id}>
-                            {player.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="player2"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Player 2</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a players" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {allPlayers.map((player) => (
-                          <SelectItem key={player.id} value={player.id}>
-                            {player.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {!isStart ? (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="player1"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Player 1</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a players" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {allPlayers.map((player) => (
+                              <SelectItem key={player.id} value={player.id}>
+                                {player.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="player2"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Player 2</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a players" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {allPlayers.map((player) => (
+                              <SelectItem key={player.id} value={player.id}>
+                                {player.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              ) : null}
               <FormField
                 control={form.control}
                 name="winner"

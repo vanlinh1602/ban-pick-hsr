@@ -1,11 +1,12 @@
 import { cloneDeep, get, set } from 'lodash';
 import { MoreVertical } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FaRegEdit, FaRegTrashAlt } from 'react-icons/fa';
 import { TbUsersPlus } from 'react-icons/tb';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { Waiting } from '@/components';
 import { toast } from '@/components/hooks/use-toast';
@@ -43,13 +44,17 @@ import {
   selectTournamentHandling,
 } from '@/features/tournament/store/selectors';
 import { Player, Tournament } from '@/features/tournament/type';
+import { selectUserInformation } from '@/features/user/store/selectors';
 import { BracketManager } from '@/lib/bracket';
+import { translations } from '@/locales/translations';
 
 const BracketTournament = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { actions } = useTournamentSlice();
   const { actions: matchActions } = useMatchSlice();
+  const { t } = useTranslation();
 
   const tournament = useSelector((state: any) =>
     selectTournamentData(state, id!),
@@ -57,6 +62,8 @@ const BracketTournament = () => {
   const matchInTour = useSelector((state: any) =>
     selectMatchOfTournament(state, id!),
   );
+  const userInfor = useSelector(selectUserInformation);
+
   const handling = useSelector(selectTournamentHandling);
   const matchHandling = useSelector(selectMatchHandling);
   const [selecteType, setSelecteType] = useState<string>('single');
@@ -73,6 +80,17 @@ const BracketTournament = () => {
       dispatch(actions.getTournament(id!));
     }
   }, []);
+
+  useEffect(() => {
+    if (tournament && tournament.organizer.id !== userInfor?.email) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed',
+        description: t(translations.errors.unAuthorized),
+      });
+      navigate('/');
+    }
+  }, [tournament, userInfor]);
 
   useEffect(() => {
     if (tournament) {
@@ -113,11 +131,14 @@ const BracketTournament = () => {
       );
       setCloneTournament({ ...cloneTournament!, players });
     } else {
-      if (cloneTournament?.players?.find((p) => p.email === player.email)) {
+      if (
+        player.email &&
+        cloneTournament?.players?.find((p) => p.email === player.email)
+      ) {
         toast({
           variant: 'destructive',
           title: 'Failed',
-          description: 'Player already exists',
+          description: t(translations.notify.playerExist),
         });
         return;
       }
@@ -136,7 +157,7 @@ const BracketTournament = () => {
           tournament: {
             ...cloneTournament!,
             format: selecteType as 'single' | 'double',
-            status: 'start',
+            status: rounds.length ? 'start' : 'set-up',
           },
           rounds,
         }),
@@ -290,6 +311,7 @@ const BracketTournament = () => {
               <SingleElimination
                 rounds={rounds as { matches: Match[] }[]}
                 allowEdit
+                isStart={tournament?.status !== 'set-up'}
                 players={cloneTournament?.players || []}
                 onSubmitEdit={(roundIndex, data) => {
                   const matchUpdate: CustomObject<Match> = {};

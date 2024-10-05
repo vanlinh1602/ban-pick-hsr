@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { FaTimes } from 'react-icons/fa';
 import { z } from 'zod';
 
@@ -14,6 +15,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { generateID } from '@/lib/utils';
+import { translations } from '@/locales/translations';
 
 import { Player } from '../../type';
 
@@ -24,9 +26,11 @@ type Props = {
 };
 
 const PlayerEditor = ({ onClose, onConfirm, data }: Props) => {
+  const { t } = useTranslation();
+
   const formSchema = z.object({
     name: z.string().min(1),
-    email: z.string().min(1),
+    email: z.string().optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -41,6 +45,7 @@ const PlayerEditor = ({ onClose, onConfirm, data }: Props) => {
     const dataUpdate: Player = {
       ...data,
       ...values,
+      email: values.email || '',
       id: data?.id || generateID(),
     };
     onConfirm(dataUpdate);
@@ -51,7 +56,10 @@ const PlayerEditor = ({ onClose, onConfirm, data }: Props) => {
       <div className="bg-white rounded-lg p-8 max-w-sm w-full">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">
-            {data?.id ? 'Edit' : 'Add'} Player
+            {data?.id
+              ? t(translations.actions.edit)
+              : t(translations.actions.add)}{' '}
+            {t(translations.player).toLowerCase()}
           </h2>
           <button
             onClick={onClose}
@@ -68,10 +76,10 @@ const PlayerEditor = ({ onClose, onConfirm, data }: Props) => {
               render={({ field }) => (
                 <FormItem className="text-start">
                   <FormLabel className="text-gray-700 font-bold">
-                    Player Name
+                    {t(translations.name)}
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Input name" {...field} />
+                    <Input placeholder={t(translations.name)} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -83,17 +91,17 @@ const PlayerEditor = ({ onClose, onConfirm, data }: Props) => {
               render={({ field }) => (
                 <FormItem className="text-start">
                   <FormLabel className="text-gray-700 font-bold">
-                    Player Email
+                    {t(translations.email)}
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Input email" {...field} />
+                    <Input placeholder="Email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button type="submit">Save</Button>
+            <Button type="submit">{t(translations.actions.save)}</Button>
           </form>
         </Form>
       </div>

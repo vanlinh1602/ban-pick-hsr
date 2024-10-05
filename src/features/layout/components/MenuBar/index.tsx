@@ -1,5 +1,4 @@
 import {
-  Bell,
   ChevronDown,
   LayoutDashboard,
   LogOut,
@@ -10,6 +9,9 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { TbLogin } from 'react-icons/tb';
+import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import logo from '@/assets/logo.png';
@@ -19,24 +21,31 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useUserSlice } from '@/features/user/store';
+import { selectUserInformation } from '@/features/user/store/selectors';
 import { translations } from '@/locales/translations';
+import { auth } from '@/services/firebase';
 
 const MenuBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const { actions } = useUserSlice();
+  const userInfo = useSelector(selectUserInformation);
 
   const activeKey = useMemo(() => {
     const path = location.pathname;
     const key = path.split('/')[1];
     return key || 'home';
   }, [location.pathname]);
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  if (activeKey === 'login') {
+    return null;
+  }
 
   return (
     <header className="bg-white shadow-sm z-10">
@@ -116,32 +125,47 @@ const MenuBar = () => {
 
           {/* User Menu and Notifications */}
           <div className="hidden md:flex items-center justify-end md:flex-1 lg:w-0">
-            <Button variant="ghost" size="icon" className="mr-2">
-              <Bell className="h-5 w-5" />
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center">
-                  <Avatar>
-                    <AvatarImage src={logo} alt="avatar" />
-                    <AvatarFallback>User</AvatarFallback>
-                  </Avatar>
+            {userInfo?.id ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center">
+                    <Avatar>
+                      <AvatarImage src={logo} alt="avatar" />
+                      <AvatarFallback>User</AvatarFallback>
+                    </Avatar>
 
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {/* <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Profile</DropdownMenuItem>
                 <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <DropdownMenuSeparator /> */}
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => {
+                      auth.signOut().then(() => {
+                        dispatch(actions.signOut());
+                      });
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="mr-2"
+                onClick={() => navigate('/login')}
+              >
+                <TbLogin className="h-5 w-5" />
+              </Button>
+            )}
           </div>
         </div>
       </div>

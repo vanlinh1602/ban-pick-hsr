@@ -3,26 +3,50 @@
   "pages": {
     "home": "Trang chủ",
     "config": "Cấu hình",
-    "match": "Trận đấu"
+    "match": "Trận đấu",
+    "tournament": "Giải đấu"
   },
 
   "actions": {
     "update": "Cập nhật",
-    "view": "Xem"
+    "view": "Xem",
+    "create": "Tạo mới",
+    "filter": "Lọc",
+    "viewDetail": "Xem chi tiết",
+    "select": "Chọn",
+    "submit": "Xác nhận",
+    "cancel": "Hủy",
+    "edit": "Chỉnh sửa",
+    "save": "Lưu",
+    "add": "Thêm"
+  },
+
+  "tournament": {
+    "status": {
+      "upcoming": "Sắp tới",
+      "inProgress": "Đang diễn ra",
+      "completed": "Đã kết thúc"
+    }
   },
 
   "notify": {
     "noUpcomingMatches": "Không có trận đấu nào sắp tới",
-    "noCompletedMatches": "Không có trận đấu nào đã kết thúc"
+    "noCompletedMatches": "Không có trận đấu nào đã kết thúc",
+    "playerExist": "Người chơi đã tồn tại"
   },
-
+  "errors": {
+    "error": "Lỗi",
+    "requireLogin": "Vui lòng đăng nhập để tiếp tục",
+    "unAuthorized": "Bạn không có quyền truy cập trang này"
+  },
   "matchStatus": {
     "set-up": "Chuẩn bị",
     "ban-pick": "Cấm chọn",
     "playing": "Đang diễn ra",
     "finished": "Kết thúc"
   },
-  "decriptions": "Mô tả",
+  "name": "Tên",
+  "descriptions": "Mô tả",
   "organizer": "Người tổ chức",
   "date": "Ngày",
   "numberOfParticipants": "Số người tham gia",
@@ -36,5 +60,8 @@
   "status": "Trạng thái",
   "winner": "Người chiến thắng",
   "totalRound": "Tổng số vòng",
-  "tournamentStructure": "Cấu trúc giải đấu"
+  "tournamentStructure": "Cấu trúc giải đấu",
+  "pickADate": "Chọn ngày",
+  "player": "Người chơi",
+  "email": "Email"
 }

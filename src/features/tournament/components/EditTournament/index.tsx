@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { FaTimes } from 'react-icons/fa';
 import { z } from 'zod';
 
@@ -23,15 +24,20 @@ import {
 } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
 import { Tournament } from '@/features/tournament/type';
+import { User } from '@/features/user/types';
 import { cn } from '@/lib/utils';
+import { translations } from '@/locales/translations';
 
 type Props = {
   onClose: () => void;
   onConfirm: (data: Partial<Tournament>) => void;
   data?: Tournament;
+  user: User;
 };
 
-const EditTournament = ({ onClose, onConfirm, data }: Props) => {
+const EditTournament = ({ onClose, onConfirm, data, user }: Props) => {
+  const { t } = useTranslation();
+
   const formSchema = z.object({
     name: z.string().min(1),
     date: z.object({
@@ -50,7 +56,7 @@ const EditTournament = ({ onClose, onConfirm, data }: Props) => {
         from: new Date(data?.date.from || Date.now()),
         to: data?.date.to ? new Date(data.date.to) : undefined,
       },
-      organizer: data?.organizer || '',
+      organizer: data?.organizer.name || '',
       description: data?.description || '',
     },
   });
@@ -63,7 +69,10 @@ const EditTournament = ({ onClose, onConfirm, data }: Props) => {
         from: values.date.from.getTime(),
         to: values.date.to?.getTime(),
       },
-      organizer: values.organizer,
+      organizer: {
+        id: user.email,
+        name: values.organizer,
+      },
       description: values.description,
     };
     if (!tournamentUpdate.status) {
@@ -77,7 +86,10 @@ const EditTournament = ({ onClose, onConfirm, data }: Props) => {
       <div className="bg-white rounded-lg p-8 max-w-md w-full">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">
-            {data?.id ? 'Edit' : 'Create'} Tournament
+            {data?.id
+              ? t(translations.actions.edit)
+              : t(translations.actions.create)}{' '}
+            {t(translations.pages.tournament).toLowerCase()}
           </h2>
           <button
             onClick={onClose}
@@ -94,10 +106,10 @@ const EditTournament = ({ onClose, onConfirm, data }: Props) => {
               render={({ field }) => (
                 <FormItem className="text-start">
                   <FormLabel className="text-gray-700 font-bold">
-                    Tournament Name
+                    {t(translations.name)}
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Tournament Name" {...field} />
+                    <Input placeholder={t(translations.name)} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -158,10 +170,10 @@ const EditTournament = ({ onClose, onConfirm, data }: Props) => {
               render={({ field }) => (
                 <FormItem className="text-start">
                   <FormLabel className="text-gray-700 font-bold">
-                    Organizer
+                    {t(translations.organizer)}
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Input organizer" {...field} />
+                    <Input placeholder={t(translations.organizer)} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -173,11 +185,11 @@ const EditTournament = ({ onClose, onConfirm, data }: Props) => {
               render={({ field }) => (
                 <FormItem className="text-start">
                   <FormLabel className="text-gray-700 font-bold">
-                    Description
+                    {t(translations.descriptions)}
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Description of the tournament"
+                      placeholder={t(translations.descriptions)}
                       className="resize-none"
                       {...field}
                     />
@@ -186,7 +198,7 @@ const EditTournament = ({ onClose, onConfirm, data }: Props) => {
                 </FormItem>
               )}
             />
-            <Button type="submit">Submit</Button>
+            <Button type="submit">{t(translations.actions.submit)}</Button>
           </form>
         </Form>
       </div>

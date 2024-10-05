@@ -11,7 +11,10 @@ export type Tournament = {
     from: number;
     to?: number;
   };
-  organizer: string;
+  organizer: {
+    id: string;
+    name: string;
+  };
   description: string;
   players: Player[];
   format: 'single' | 'double';

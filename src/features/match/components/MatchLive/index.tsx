@@ -150,7 +150,7 @@ const MatchLive = ({ id }: Props) => {
       <div className="flex flex-col md:flex-row h-full bg-gray-100">
         {/* Left Column - Video Player */}
         <div className="md:w-2/3 p-4">
-          {activeTurn === player ? (
+          {player && activeTurn !== player ? (
             <PlayerVideo room={id} />
           ) : (
             <ViewerVideo room={id} isLive={matchDetail.isLive} />

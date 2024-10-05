@@ -27,10 +27,7 @@ export type Match = {
   winMatch?: string;
   lossMatch?: string;
   games?: MatchGame[];
-  host?: {
-    id: string;
-    email?: string;
-  };
+  host?: string;
   matchSetup?: MatchSetUpInfo;
   isLive?: boolean;
 };
